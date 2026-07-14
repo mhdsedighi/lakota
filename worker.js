@@ -916,12 +916,13 @@ export default {
 		noteCounter = 0; // FIX: Reset infinite counter to prevent unbounded memory growth
 		if (complexPlayTimeout) { clearTimeout(complexPlayTimeout); complexPlayTimeout = null; }
 		stopDrone();
-		// Stop only complex-mode notes
+
 		Object.keys(activeNotes).forEach(key => {
-			if (key.startsWith('melody-') || key.startsWith('harmony-')) {
-				stopNote(key);
-			}
+			stopNote(key);
 		});
+
+		clearAllVisuals();
+		
 		complexBtn.classList.remove('active');
 		complexBtn.innerHTML = '🎼 فی البداهه پیچیده';
 	}
