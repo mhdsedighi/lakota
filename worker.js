@@ -259,7 +259,18 @@ export default {
 	.complex-row .random-btn.complex {
 		flex: 1;
 	}
-	
+
+	.source-btn {
+		background: linear-gradient(180deg, #333333 0%, #1a1a1a 100%);
+		border-color: #555555;
+		font-size: 0.95rem;
+		padding: 12px 20px;
+	}
+	.source-btn:hover {
+		background: linear-gradient(180deg, #444444 0%, #2a2a2a 100%);
+		transform: translateY(-2px);
+	}
+
 	.params-menu {
 		display: none;
 		flex-direction: column;
@@ -398,6 +409,12 @@ export default {
 		<button id="paramsToggleBtn" class="random-btn small-params-btn" title="Parameters (پارامترها)">⚙️</button>
 		<button id="complexPlayBtn" class="random-btn complex">🎼 فی البداهه پیچیده</button>
 	</div>
+
+	<!-- Hand Grab Mode Toggle Button -->
+	<button id="handGrabModeBtn" class="random-btn">✋ حالت دست گرفتن</button>
+
+	<!-- Source Button (Hidden in hand-grab mode via .btn-group rule) -->
+	<button id="sourceBtn" class="random-btn source-btn">🔗 Source (منبع)</button>
 </div>
 
 <!-- Expandable Parameters Menu -->
@@ -455,9 +472,6 @@ export default {
 	<button id="resetParamsBtn" class="random-btn" style="margin-top: 10px; font-size: 0.9rem; padding: 10px;">🔄 بازگشت به پیش‌فرض (Reset Defaults)</button>
 	<div id="cacheStatus" class="cache-status">✓ Saved</div>
 </div>
-
-<!-- Hand Grab Mode Toggle Button -->
-<button id="handGrabModeBtn" class="random-btn">✋ حالت دست گرفتن</button>
 
 <!-- Back Button (visible only in hand grab mode) -->
 <button id="backBtn">✕</button>
@@ -1115,6 +1129,11 @@ export default {
 
 	// ensures sliders/inputs reflect the cached values, not just HTML defaults
 	syncUIWithParams();
+
+	// === NEW: Source Button Logic ===
+	document.getElementById('sourceBtn').addEventListener('click', () => {
+		window.open('https://github.com/mhdsedighi/lakota', '_blank');
+	});
 
 	// === Hand Grab Mode Toggle Logic ===
 	const handGrabModeBtn = document.getElementById('handGrabModeBtn');
