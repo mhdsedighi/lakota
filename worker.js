@@ -117,13 +117,13 @@ export default {
 		align-items: center;
 		justify-content: space-around;
 		width: 100px;
-		height: 90vh; /* Optimized for mobile screen height */
-		max-height: 750px; /* Prevent overflow on very tall screens */
+		height: 85vh; /* Optimized for mobile screen height */
+		max-height: 700px; /* Prevent overflow on very tall screens */
 		background: linear-gradient(90deg, #3a1f0e, #6b3a1f, #3a1f0e);
 		border-radius: 50px;
 		box-shadow: inset 0 -10px 20px rgba(0,0,0,0.6), 0 10px 30px rgba(0,0,0,0.6);
 		padding: 15px 0;
-		margin: 0 auto;
+		margin: 70px auto 0 auto; /* Added top margin to clear the back button */
 	}
 	.v-hole {
 		width: 55px;
@@ -149,7 +149,8 @@ export default {
 	body.hand-grab-mode .instructions,
 	body.hand-grab-mode .keyboard,
 	body.hand-grab-mode .flute-visual,
-	body.hand-grab-mode .btn-group {
+	body.hand-grab-mode .btn-group,
+	body.hand-grab-mode #handGrabModeBtn {
 		display: none !important;
 	}
 	
@@ -224,14 +225,15 @@ export default {
 		background: linear-gradient(180deg, #3a7a60 0%, #2c5e4a 100%);
 	}
 	
-	/* Back button - small and top right in hand grab mode */
+	/* Back button - centered at the top, clearly above the flute to prevent accidental touch */
 	#backBtn {
 		display: none;
 		position: fixed;
-		top: 15px;
-		right: 15px;
-		padding: 8px 16px;
-		font-size: 0.9rem;
+		top: 20px;
+		right: 20px;
+		padding: 10px 16px;
+		font-size: 1rem;
+		font-weight: bold;
 		background: linear-gradient(180deg, #4a2c17 0%, #2c1635 100%);
 		border: 2px solid #8b5a2b;
 		border-radius: 20px;
