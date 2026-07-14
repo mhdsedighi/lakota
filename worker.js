@@ -20,6 +20,7 @@ export default {
 		margin: 0;
 		overflow-y: auto;
 		padding: 20px 10px 40px 10px;
+		transition: all 0.3s ease;
 	}
 	.flute-image {
 		width: 80%;
@@ -108,7 +109,61 @@ export default {
 		background: #d4a373; 
 		box-shadow: 0 0 15px #d4a373, inset 0 2px 4px rgba(0,0,0,0.8); 
 	}
+
+	/* === HAND GRAB MODE STYLES === */
+	.vertical-flute {
+		display: none; /* Hidden by default */
+		flex-direction: column;
+		align-items: center;
+		justify-content: space-around;
+		width: 100px;
+		height: 90vh; /* Optimized for mobile screen height */
+		max-height: 750px; /* Prevent overflow on very tall screens */
+		background: linear-gradient(90deg, #3a1f0e, #6b3a1f, #3a1f0e);
+		border-radius: 50px;
+		box-shadow: inset 0 -10px 20px rgba(0,0,0,0.6), 0 10px 30px rgba(0,0,0,0.6);
+		padding: 15px 0;
+		margin: 0 auto;
+	}
+	.v-hole {
+		width: 55px;
+		height: 55px;
+		background: #1a0f08;
+		border-radius: 50%;
+		box-shadow: inset 0 4px 8px rgba(0,0,0,0.9), 0 2px 4px rgba(255,255,255,0.1);
+		transition: all 0.1s ease;
+		cursor: pointer;
+		touch-action: manipulation;
+		-webkit-tap-highlight-color: transparent;
+		flex-shrink: 0; /* Prevents squishing on smaller screens */
+	}
+	.v-hole.active {
+		background: #d4a373;
+		box-shadow: 0 0 25px #d4a373, inset 0 4px 8px rgba(0,0,0,0.5);
+		transform: scale(0.92);
+	}
 	
+	/* Hide standard UI elements when in hand grab mode */
+	body.hand-grab-mode .flute-image,
+	body.hand-grab-mode h1,
+	body.hand-grab-mode .instructions,
+	body.hand-grab-mode .keyboard,
+	body.hand-grab-mode .flute-visual,
+	body.hand-grab-mode .btn-group {
+		display: none !important;
+	}
+	
+	/* Show vertical flute in hand grab mode */
+	body.hand-grab-mode .vertical-flute {
+		display: flex;
+	}
+	
+	/* Ensure hand grab mode centers the vertical flute */
+	body.hand-grab-mode {
+		justify-content: center;
+		padding: 10px;
+	}
+
 	.btn-group {
 		display: flex;
 		flex-direction: column;
@@ -158,6 +213,41 @@ export default {
 		color: #2c1635;
 		border-color: #c49ed4;
 	}
+	
+	/* Hand grab mode toggle button */
+	#handGrabModeBtn {
+		margin-top: 25px;
+		background: linear-gradient(180deg, #2c5e4a 0%, #16352c 100%);
+		border-color: #5a9e8b;
+	}
+	#handGrabModeBtn:hover {
+		background: linear-gradient(180deg, #3a7a60 0%, #2c5e4a 100%);
+	}
+	
+	/* Back button - small and top right in hand grab mode */
+	#backBtn {
+		display: none;
+		position: fixed;
+		top: 15px;
+		right: 15px;
+		padding: 8px 16px;
+		font-size: 0.9rem;
+		background: linear-gradient(180deg, #4a2c17 0%, #2c1635 100%);
+		border: 2px solid #8b5a2b;
+		border-radius: 20px;
+		color: #f4e4d4;
+		cursor: pointer;
+		z-index: 1000;
+		box-shadow: 0 4px 10px rgba(0,0,0,0.4);
+		touch-action: manipulation;
+		-webkit-tap-highlight-color: transparent;
+	}
+	#backBtn:hover {
+		background: linear-gradient(180deg, #6b4423 0%, #4a2c17 100%);
+	}
+	body.hand-grab-mode #backBtn {
+		display: block;
+	}
 </style>
 </head>
 <body>
@@ -170,10 +260,19 @@ export default {
 <div class="keyboard" id="keyboard"></div>
 <div class="flute-visual" id="fluteVisual"></div>
 
+<!-- New Vertical Flute for Hand Grab Mode -->
+<div class="vertical-flute" id="verticalFlute"></div>
+
 <div class="btn-group">
 	<button id="randomPlayBtn" class="random-btn">🎵 فی البداهه</button>
 	<button id="complexPlayBtn" class="random-btn complex">🎼 فی البداهه پیچیده</button>
 </div>
+
+<!-- Hand Grab Mode Toggle Button -->
+<button id="handGrabModeBtn" class="random-btn">✋ حالت دست گرفتن</button>
+
+<!-- Back Button (visible only in hand grab mode) -->
+<button id="backBtn">✕</button>
 
 <script>
 	/* 
@@ -182,8 +281,9 @@ export default {
 	 * 2. Memory Management: Audio nodes are explicitly disconnected after release to prevent leaks.
 	 * 3. Visual-Audio Decoupling: playNote accepts 'displayKey' to allow polyphonic IDs to light up correct holes.
 	 * 4. Infinite Counter Fix: noteCounter is now reset in stopComplexPlay().
-	 * 5. Accessibility: Both keys and holes now have role="button", tabIndex, and aria-labels.
-	 * 6. Note: The ';' key for G5 is US ANSI layout specific. International users may need adaptation.
+	 * 5. Accessibility: Keys and holes have role="button", tabIndex, and aria-labels.
+	 * 6. Hand Grab Mode: Vertical flute with finger-friendly touch targets (55px) and proper margins.
+	 * 7. Note: The ';' key for G5 is US ANSI layout specific. International users may need adaptation.
 	 */
 
 	const NOTES = [
@@ -201,6 +301,7 @@ export default {
 
 	const keyboardEl = document.getElementById('keyboard');
 	const fluteVisualEl = document.getElementById('fluteVisual');
+	const verticalFluteEl = document.getElementById('verticalFlute');
 	
 	NOTES.forEach((n) => {
 		// --- Create Keyboard Key ---
@@ -212,7 +313,7 @@ export default {
 		keyEl.tabIndex = 0;
 		keyEl.innerHTML = n.note + '<span>' + n.key.toUpperCase() + '</span>';
 		
-		// --- Create Flute Hole (Now Clickable) ---
+		// --- Create Horizontal Flute Hole ---
 		const holeEl = document.createElement('div');
 		holeEl.className = 'hole';
 		holeEl.id = 'hole-' + n.key;
@@ -220,7 +321,15 @@ export default {
 		holeEl.setAttribute('aria-label', 'Play note ' + n.note);
 		holeEl.tabIndex = 0;
 		
-		// Shared event handlers for both key and hole
+		// --- Create Vertical Flute Hole (Hand Grab Mode) ---
+		const vHoleEl = document.createElement('div');
+		vHoleEl.className = 'v-hole';
+		vHoleEl.id = 'v-hole-' + n.key;
+		vHoleEl.setAttribute('role', 'button');
+		vHoleEl.setAttribute('aria-label', 'Play note ' + n.note);
+		vHoleEl.tabIndex = 0;
+		
+		// Shared event handlers for key, horizontal hole, and vertical hole
 		const startPlaying = (e) => {
 			e.preventDefault();
 			if (isRandomPlaying) stopRandomPlay();
@@ -246,7 +355,7 @@ export default {
 		});
 		keyboardEl.appendChild(keyEl);
 
-		// Attach listeners to HOLE
+		// Attach listeners to HORIZONTAL HOLE
 		holeEl.addEventListener('mousedown', startPlaying);
 		holeEl.addEventListener('mouseup', stopPlaying);
 		holeEl.addEventListener('mouseleave', stopPlaying);
@@ -259,6 +368,20 @@ export default {
 			if (e.key === 'Enter' || e.key === ' ') stopPlaying(e);
 		});
 		fluteVisualEl.appendChild(holeEl);
+
+		// Attach listeners to VERTICAL HOLE
+		vHoleEl.addEventListener('mousedown', startPlaying);
+		vHoleEl.addEventListener('mouseup', stopPlaying);
+		vHoleEl.addEventListener('mouseleave', stopPlaying);
+		vHoleEl.addEventListener('touchstart', startPlaying, { passive: false });
+		vHoleEl.addEventListener('touchend', stopPlaying, { passive: false });
+		vHoleEl.addEventListener('keydown', (e) => {
+			if (e.key === 'Enter' || e.key === ' ') startPlaying(e);
+		});
+		vHoleEl.addEventListener('keyup', (e) => {
+			if (e.key === 'Enter' || e.key === ' ') stopPlaying(e);
+		});
+		verticalFluteEl.appendChild(vHoleEl);
 	});
 
 	let audioCtx;
@@ -368,10 +491,14 @@ export default {
 
 		activeNotes[key] = { osc, whiteNoise, lfo, oscGain, noiseGain, lfoGain, lowpass, bandpass };
 		
+		// Update visuals for ALL representations (key, horizontal hole, vertical hole)
 		const keyEl = document.getElementById('key-' + displayKey);
 		const holeEl = document.getElementById('hole-' + displayKey);
+		const vHoleEl = document.getElementById('v-hole-' + displayKey);
+		
 		if (keyEl) keyEl.classList.add('active');
 		if (holeEl) holeEl.classList.add('active');
+		if (vHoleEl) vHoleEl.classList.add('active');
 	}
 
 	function stopNote(key, displayKey = key) {
@@ -413,10 +540,14 @@ export default {
 
 		delete activeNotes[key];
 
+		// Clear visuals for ALL representations
 		const keyEl = document.getElementById('key-' + displayKey);
 		const holeEl = document.getElementById('hole-' + displayKey);
+		const vHoleEl = document.getElementById('v-hole-' + displayKey);
+		
 		if (keyEl) keyEl.classList.remove('active');
 		if (holeEl) holeEl.classList.remove('active');
+		if (vHoleEl) vHoleEl.classList.remove('active');
 	}
 
 	// === Unified Visual Cleanup ===
@@ -424,6 +555,7 @@ export default {
 		// Remove active class from ALL keys and holes
 		document.querySelectorAll('.key').forEach(el => el.classList.remove('active'));
 		document.querySelectorAll('.hole').forEach(el => el.classList.remove('active'));
+		document.querySelectorAll('.v-hole').forEach(el => el.classList.remove('active'));
 	}
 
 	// === Simple Random Melody ===
@@ -662,6 +794,23 @@ export default {
 	}
 
 	complexBtn.addEventListener('click', () => { initAudio(); playComplexMelody(); });
+
+	// === Hand Grab Mode Toggle Logic ===
+	const handGrabModeBtn = document.getElementById('handGrabModeBtn');
+	const backBtn = document.getElementById('backBtn');
+	let isHandGrabMode = false;
+	
+	function toggleHandGrabMode() {
+		isHandGrabMode = !isHandGrabMode;
+		if (isHandGrabMode) {
+			document.body.classList.add('hand-grab-mode');
+		} else {
+			document.body.classList.remove('hand-grab-mode');
+		}
+	}
+	
+	handGrabModeBtn.addEventListener('click', toggleHandGrabMode);
+	backBtn.addEventListener('click', toggleHandGrabMode);
 
 	// === Global Event Listeners ===
 	window.addEventListener('keydown', (e) => {
