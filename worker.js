@@ -377,13 +377,14 @@ export default {
 		}
 	});
 
-	// Prevent stuck notes and stop melody if user leaves the tab
+	// FIXED: Only clear manually held notes on blur to prevent "stuck" sounds.
+	// The random melody is explicitly allowed to continue playing in background tabs.
 	window.addEventListener('blur', () => {
-		if (isRandomPlaying) stopRandomPlay();
-		Object.keys(activeNotes).forEach(key => stopNote(key));
+		if (!isRandomPlaying) {
+			Object.keys(activeNotes).forEach(key => stopNote(key));
+		}
 	});
 
-	// Initialize audio context on first interaction
 	document.body.addEventListener('click', initAudio, { once: true });
 	document.body.addEventListener('touchstart', initAudio, { once: true });
 	document.body.addEventListener('keydown', initAudio, { once: true });
@@ -394,7 +395,7 @@ export default {
 		return new Response(html, {
 			headers: {
 				'content-type': 'text/html;charset=UTF-8',
-				'cache-control': 'public, max-age=86400, s-maxage=86400', // Cache at edge for 24h
+				'cache-control': 'public, max-age=86400, s-maxage=86400',
 			},
 		});
 	},
