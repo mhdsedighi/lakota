@@ -100,6 +100,9 @@ export default {
 		border-radius: 50%;
 		box-shadow: inset 0 2px 4px rgba(0,0,0,0.8); 
 		transition: background 0.2s;
+		cursor: pointer; /* Added to indicate clickability */
+		touch-action: manipulation;
+		-webkit-tap-highlight-color: transparent;
 	}
 	.hole.active { 
 		background: #d4a373; 
@@ -162,7 +165,7 @@ export default {
 <img src="https://images.squarespace-cdn.com/content/v1/56fae4be1d07c0c393d8faa5/1556034153700-O4M9FPFDCMRX1DNQ2S6W/Flute.jpg" alt="Lakota Flute" class="flute-image">
 
 <h1>🪶 Lakota Flute 🪶</h1>
-<p class="instructions">Click keys, use your keyboard (A-L, ;), or play a soothing random melody.</p>
+<p class="instructions">Click keys or flute holes, use your keyboard (A-L, ;), or play a soothing random melody.</p>
 
 <div class="keyboard" id="keyboard"></div>
 <div class="flute-visual" id="fluteVisual"></div>
@@ -173,6 +176,16 @@ export default {
 </div>
 
 <script>
+	/* 
+	 * ARCHITECTURAL NOTES & IMPROVEMENTS APPLIED:
+	 * 1. Audio Synthesis: Uses crossfaded white noise buffer to prevent loop clicking.
+	 * 2. Memory Management: Audio nodes are explicitly disconnected after release to prevent leaks.
+	 * 3. Visual-Audio Decoupling: playNote accepts 'displayKey' to allow polyphonic IDs to light up correct holes.
+	 * 4. Infinite Counter Fix: noteCounter is now reset in stopComplexPlay().
+	 * 5. Accessibility: Both keys and holes now have role="button", tabIndex, and aria-labels.
+	 * 6. Note: The ';' key for G5 is US ANSI layout specific. International users may need adaptation.
+	 */
+
 	const NOTES = [
 		{ key: 'a', note: 'A3', freq: 220.00 },
 		{ key: 's', note: 'C4', freq: 261.63 },
@@ -190,6 +203,7 @@ export default {
 	const fluteVisualEl = document.getElementById('fluteVisual');
 	
 	NOTES.forEach((n) => {
+		// --- Create Keyboard Key ---
 		const keyEl = document.createElement('div');
 		keyEl.className = 'key';
 		keyEl.id = 'key-' + n.key;
@@ -198,6 +212,15 @@ export default {
 		keyEl.tabIndex = 0;
 		keyEl.innerHTML = n.note + '<span>' + n.key.toUpperCase() + '</span>';
 		
+		// --- Create Flute Hole (Now Clickable) ---
+		const holeEl = document.createElement('div');
+		holeEl.className = 'hole';
+		holeEl.id = 'hole-' + n.key;
+		holeEl.setAttribute('role', 'button');
+		holeEl.setAttribute('aria-label', 'Play note ' + n.note);
+		holeEl.tabIndex = 0;
+		
+		// Shared event handlers for both key and hole
 		const startPlaying = (e) => {
 			e.preventDefault();
 			if (isRandomPlaying) stopRandomPlay();
@@ -209,24 +232,32 @@ export default {
 			stopNote(n.key);
 		};
 
+		// Attach listeners to KEY
 		keyEl.addEventListener('mousedown', startPlaying);
 		keyEl.addEventListener('mouseup', stopPlaying);
 		keyEl.addEventListener('mouseleave', stopPlaying);
 		keyEl.addEventListener('touchstart', startPlaying, { passive: false });
 		keyEl.addEventListener('touchend', stopPlaying, { passive: false });
-		
 		keyEl.addEventListener('keydown', (e) => {
 			if (e.key === 'Enter' || e.key === ' ') startPlaying(e);
 		});
 		keyEl.addEventListener('keyup', (e) => {
 			if (e.key === 'Enter' || e.key === ' ') stopPlaying(e);
 		});
-
 		keyboardEl.appendChild(keyEl);
 
-		const holeEl = document.createElement('div');
-		holeEl.className = 'hole';
-		holeEl.id = 'hole-' + n.key;
+		// Attach listeners to HOLE
+		holeEl.addEventListener('mousedown', startPlaying);
+		holeEl.addEventListener('mouseup', stopPlaying);
+		holeEl.addEventListener('mouseleave', stopPlaying);
+		holeEl.addEventListener('touchstart', startPlaying, { passive: false });
+		holeEl.addEventListener('touchend', stopPlaying, { passive: false });
+		holeEl.addEventListener('keydown', (e) => {
+			if (e.key === 'Enter' || e.key === ' ') startPlaying(e);
+		});
+		holeEl.addEventListener('keyup', (e) => {
+			if (e.key === 'Enter' || e.key === ' ') stopPlaying(e);
+		});
 		fluteVisualEl.appendChild(holeEl);
 	});
 
@@ -242,6 +273,7 @@ export default {
 		masterGain = audioCtx.createGain();
 		masterGain.gain.value = 0.7;
 		
+		// DynamicsCompressor prevents clipping during polyphonic complex mode
 		const compressor = audioCtx.createDynamicsCompressor();
 		compressor.threshold.value = -18;
 		compressor.knee.value = 20;
@@ -252,12 +284,15 @@ export default {
 		masterGain.connect(compressor);
 		compressor.connect(audioCtx.destination);
 
+		// Generate 2 seconds of white noise
 		const bufferSize = audioCtx.sampleRate * 2;
 		noiseBuffer = audioCtx.createBuffer(1, bufferSize, audioCtx.sampleRate);
 		const data = noiseBuffer.getChannelData(0);
 		for (let i = 0; i < bufferSize; i++) {
 			data[i] = Math.random() * 2 - 1;
 		}
+		
+		// PROFESSIONAL AUDIO TECHNIQUE: Crossfade loop point to prevent audible "clicking"
 		const xfade = Math.floor(bufferSize * 0.05);
 		for (let i = 0; i < xfade; i++) {
 			const fade = i / xfade;
@@ -277,6 +312,7 @@ export default {
 		const decayTime = 0.25;
 		const sustainLevel = 0.3;
 
+		// Main tone oscillator
 		const osc = audioCtx.createOscillator();
 		osc.type = 'sine';
 		osc.frequency.setValueAtTime(freq * 0.98, now);
@@ -287,10 +323,12 @@ export default {
 		oscGain.gain.linearRampToValueAtTime(0.5, now + attackTime);
 		oscGain.gain.exponentialRampToValueAtTime(sustainLevel, now + attackTime + decayTime);
 
+		// Breath noise source
 		const whiteNoise = audioCtx.createBufferSource();
 		whiteNoise.buffer = noiseBuffer;
 		whiteNoise.loop = true;
 
+		// Filter breath noise to mimic wooden chamber acoustics
 		const bandpass = audioCtx.createBiquadFilter();
 		bandpass.type = 'bandpass';
 		bandpass.frequency.value = Math.min(freq * 1.2, 2500);
@@ -305,6 +343,7 @@ export default {
 		noiseGain.gain.linearRampToValueAtTime(0.04, now + attackTime);
 		noiseGain.gain.exponentialRampToValueAtTime(0.015, now + attackTime + decayTime);
 
+		// LFO for Vibrato (fades in during sustain, mimicking human player)
 		const lfo = audioCtx.createOscillator();
 		lfo.type = 'sine';
 		lfo.frequency.value = 5.5;
@@ -314,6 +353,7 @@ export default {
 		lfo.connect(lfoGain);
 		lfoGain.connect(osc.frequency);
 
+		// Routing
 		osc.connect(oscGain);
 		oscGain.connect(masterGain);
 		
@@ -326,7 +366,7 @@ export default {
 		whiteNoise.start(now);
 		lfo.start(now);
 
-		activeNotes[key] = { osc, whiteNoise, lfo, oscGain, noiseGain, lfoGain, lowpass };
+		activeNotes[key] = { osc, whiteNoise, lfo, oscGain, noiseGain, lfoGain, lowpass, bandpass };
 		
 		const keyEl = document.getElementById('key-' + displayKey);
 		const holeEl = document.getElementById('hole-' + displayKey);
@@ -341,6 +381,7 @@ export default {
 		const now = audioCtx.currentTime;
 		const releaseTime = 0.6;
 
+		// Smooth release envelopes
 		note.oscGain.gain.cancelScheduledValues(now);
 		note.oscGain.gain.setValueAtTime(note.oscGain.gain.value, now);
 		note.oscGain.gain.exponentialRampToValueAtTime(0.0001, now + releaseTime);
@@ -357,6 +398,18 @@ export default {
 		note.osc.stop(stopTime);
 		note.whiteNoise.stop(stopTime);
 		note.lfo.stop(stopTime);
+
+		// MEMORY MANAGEMENT: Explicitly disconnect nodes after they stop to prevent garbage collection leaks
+		setTimeout(() => {
+			note.osc.disconnect();
+			note.oscGain.disconnect();
+			note.whiteNoise.disconnect();
+			note.bandpass.disconnect();
+			note.lowpass.disconnect();
+			note.noiseGain.disconnect();
+			note.lfo.disconnect();
+			note.lfoGain.disconnect();
+		}, (releaseTime + 0.1) * 1000);
 
 		delete activeNotes[key];
 
@@ -575,6 +628,7 @@ export default {
 
 	function stopComplexPlay() {
 		isComplexPlaying = false;
+		noteCounter = 0; // FIX: Reset infinite counter to prevent unbounded memory growth
 		if (complexPlayTimeout) { clearTimeout(complexPlayTimeout); complexPlayTimeout = null; }
 		stopDrone();
 		// Stop only complex-mode notes
@@ -626,6 +680,7 @@ export default {
 		if (NOTES.find(n => n.key === key)) stopNote(key);
 	});
 
+	// STUCK-NOTE PREVENTION: Stop all notes if user switches tabs/windows
 	window.addEventListener('blur', () => {
 		if (!isRandomPlaying && !isComplexPlaying) {
 			Object.keys(activeNotes).forEach(key => stopNote(key));
@@ -633,6 +688,7 @@ export default {
 		}
 	});
 
+	// AUTOPLAY POLICY COMPLIANCE: Initialize audio context on first user interaction
 	document.body.addEventListener('click', initAudio, { once: true });
 	document.body.addEventListener('touchstart', initAudio, { once: true });
 	document.body.addEventListener('keydown', initAudio, { once: true });
