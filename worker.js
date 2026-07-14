@@ -5,7 +5,7 @@ export default {
 <html lang="en">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
 <title>Lakota Flute Simulator</title>
 <style>
 	body {
@@ -15,45 +15,99 @@ export default {
 		display: flex;
 		flex-direction: column;
 		align-items: center;
-		justify-content: center;
-		height: 100vh;
+		justify-content: flex-start; /* Prevents top cutoff on mobile scroll */
+		min-height: 100vh; /* Allows content to grow beyond screen height */
 		margin: 0;
-		overflow: hidden;
+		overflow-y: auto; /* Enables vertical scrolling */
+		padding: 20px 10px 40px 10px; /* Safe spacing top and bottom */
 	}
-	h1 { font-size: 2.5rem; text-shadow: 2px 2px 4px rgba(0,0,0,0.5); margin-bottom: 10px; color: #d4a373; }
-	.instructions { margin-bottom: 20px; font-size: 1.1rem; opacity: 0.8; text-align: center; padding: 0 20px; }
-	.keyboard { display: flex; gap: 10px; perspective: 1000px; flex-wrap: wrap; justify-content: center; padding: 0 10px; }
+	.flute-image {
+		width: 80%;
+		max-width: 350px;
+		height: auto;
+		border-radius: 12px;
+		box-shadow: 0 8px 20px rgba(0,0,0,0.4);
+		margin-bottom: 15px;
+		border: 3px solid #8b5a2b;
+	}
+	h1 { 
+		font-size: 2rem; 
+		text-shadow: 2px 2px 4px rgba(0,0,0,0.5); 
+		margin: 0 0 10px 0; 
+		color: #d4a373; 
+		text-align: center; 
+	}
+	.instructions { 
+		margin-bottom: 20px; 
+		font-size: 1rem; 
+		opacity: 0.8; 
+		text-align: center; 
+		padding: 0 10px; 
+		line-height: 1.4; 
+	}
+	.keyboard { 
+		display: flex; 
+		gap: 8px; 
+		perspective: 1000px; 
+		flex-wrap: wrap; 
+		justify-content: center; 
+		padding: 0 5px; 
+	}
 	.key {
-		width: 60px; height: 90px;
+		width: 55px; 
+		height: 85px; /* Slightly smaller for better mobile fit */
 		background: linear-gradient(180deg, #8b5a2b 0%, #5c3a21 100%);
-		border: 2px solid #3e2312; border-radius: 12px;
-		display: flex; flex-direction: column; align-items: center; justify-content: center;
-		font-size: 1.3rem; font-weight: bold; color: #f4e4d4;
-		box-shadow: 0 8px 0 #3e2312, 0 12px 10px rgba(0,0,0,0.4);
-		transition: all 0.1s ease; user-select: none; cursor: pointer;
+		border: 2px solid #3e2312; 
+		border-radius: 12px;
+		display: flex; 
+		flex-direction: column; 
+		align-items: center; 
+		justify-content: center;
+		font-size: 1.2rem; 
+		font-weight: bold; 
+		color: #f4e4d4;
+		box-shadow: 0 6px 0 #3e2312, 0 10px 8px rgba(0,0,0,0.4);
+		transition: all 0.1s ease; 
+		user-select: none; 
+		cursor: pointer;
+		touch-action: manipulation; /* Prevents double-tap zoom on mobile */
+		-webkit-tap-highlight-color: transparent;
 	}
-	.key span { font-size: 0.75rem; opacity: 0.7; margin-top: 5px; }
+	.key span { font-size: 0.7rem; opacity: 0.7; margin-top: 4px; }
 	.key.active {
-		transform: translateY(8px);
+		transform: translateY(6px);
 		box-shadow: 0 0px 0 #3e2312, 0 4px 5px rgba(0,0,0,0.4);
 		background: linear-gradient(180deg, #a67c52 0%, #8b5a2b 100%);
 		color: #fff;
 	}
 	.flute-visual {
-		margin-top: 40px; width: 90%; max-width: 600px; height: 40px;
+		margin-top: 25px; 
+		width: 95%; 
+		max-width: 600px; 
+		height: 36px;
 		background: linear-gradient(90deg, #4a2c17, #8b5a2b, #4a2c17);
-		border-radius: 20px; display: flex; justify-content: space-around; align-items: center;
+		border-radius: 20px; 
+		display: flex; 
+		justify-content: space-around; 
+		align-items: center;
 		box-shadow: inset 0 -5px 10px rgba(0,0,0,0.5), 0 5px 15px rgba(0,0,0,0.5);
-		padding: 0 20px;
+		padding: 0 15px;
 	}
 	.hole {
-		width: 20px; height: 20px; background: #1a0f08; border-radius: 50%;
-		box-shadow: inset 0 2px 4px rgba(0,0,0,0.8); transition: background 0.2s;
+		width: 18px; 
+		height: 18px; 
+		background: #1a0f08; 
+		border-radius: 50%;
+		box-shadow: inset 0 2px 4px rgba(0,0,0,0.8); 
+		transition: background 0.2s;
 	}
-	.hole.active { background: #d4a373; box-shadow: 0 0 15px #d4a373, inset 0 2px 4px rgba(0,0,0,0.8); }
+	.hole.active { 
+		background: #d4a373; 
+		box-shadow: 0 0 15px #d4a373, inset 0 2px 4px rgba(0,0,0,0.8); 
+	}
 	
 	.random-btn {
-		margin-top: 35px;
+		margin-top: 25px;
 		padding: 14px 28px;
 		font-size: 1.1rem;
 		font-family: 'Georgia', serif;
@@ -67,6 +121,8 @@ export default {
 		display: flex;
 		align-items: center;
 		gap: 8px;
+		touch-action: manipulation;
+		-webkit-tap-highlight-color: transparent;
 	}
 	.random-btn:hover {
 		background: linear-gradient(180deg, #8b5a2b 0%, #6b4423 100%);
@@ -83,13 +139,15 @@ export default {
 </head>
 <body>
 
+<img src="https://images.squarespace-cdn.com/content/v1/56fae4be1d07c0c393d8faa5/1556034153700-O4M9FPFDCMRX1DNQ2S6W/Flute.jpg" alt="Lakota Flute" class="flute-image">
+
 <h1>🪶 Lakota Flute 🪶</h1>
 <p class="instructions">Click keys, use your keyboard (A-L, ;), or play a soothing random melody.</p>
 
 <div class="keyboard" id="keyboard"></div>
 <div class="flute-visual" id="fluteVisual"></div>
 
-<button id="randomPlayBtn" class="random-btn">🎵 Play Soothing Melody</button>
+<button id="randomPlayBtn" class="random-btn">فی البداهه</button>
 
 <script>
 	const NOTES = [
@@ -119,7 +177,7 @@ export default {
 		
 		const startPlaying = (e) => {
 			e.preventDefault();
-			if (isRandomPlaying) stopRandomPlay(); // Give user immediate control
+			if (isRandomPlaying) stopRandomPlay();
 			playNote(n.freq, n.key);
 		};
 		const stopPlaying = (e) => {
@@ -133,7 +191,6 @@ export default {
 		keyEl.addEventListener('touchstart', startPlaying, { passive: false });
 		keyEl.addEventListener('touchend', stopPlaying, { passive: false });
 		
-		// Keyboard accessibility for focused divs
 		keyEl.addEventListener('keydown', (e) => {
 			if (e.key === 'Enter' || e.key === ' ') startPlaying(e);
 		});
@@ -291,7 +348,7 @@ export default {
 		}
 		Object.keys(activeNotes).forEach(key => stopNote(key));
 		randomBtn.classList.remove('active');
-		randomBtn.innerHTML = '🎵 Play Soothing Melody';
+		randomBtn.innerHTML = 'فی البداهه';
 	}
 
 	function playSoothingMelody() {
@@ -303,29 +360,26 @@ export default {
 		isRandomPlaying = true;
 		initAudio();
 		randomBtn.classList.add('active');
-		randomBtn.innerHTML = '⏹ Stop Melody';
+		randomBtn.innerHTML = 'توقف';
 
-		// Weighted notes favoring lower/mid register for a warm, soothing tone
 		const soothingNotes = [
-			{ key: 'a', weight: 4 }, // Root
+			{ key: 'a', weight: 4 },
 			{ key: 's', weight: 2 },
 			{ key: 'd', weight: 3 },
 			{ key: 'f', weight: 3 },
-			{ key: 'g', weight: 4 }, // Fifth
-			{ key: 'h', weight: 2 }  // Octave root
+			{ key: 'g', weight: 4 },
+			{ key: 'h', weight: 2 }
 		];
 		
 		function scheduleNext() {
 			if (!isRandomPlaying) return;
 
-			// 25% chance of a rest (silence) for natural breathing phrasing
 			if (Math.random() < 0.25) {
 				const restDuration = 600 + Math.random() * 800;
 				randomPlayTimeout = setTimeout(scheduleNext, restDuration);
 				return;
 			}
 
-			// Pick weighted random note
 			const totalWeight = soothingNotes.reduce((sum, n) => sum + n.weight, 0);
 			let random = Math.random() * totalWeight;
 			let selected = soothingNotes[0];
@@ -339,13 +393,12 @@ export default {
 			}
 
 			const noteData = NOTES.find(n => n.key === selected.key);
-			const duration = 1200 + Math.random() * 1800; // 1.2 to 3.0 seconds per note
+			const duration = 1200 + Math.random() * 1800;
 
 			playNote(noteData.freq, noteData.key);
 			
 			randomPlayTimeout = setTimeout(() => {
 				stopNote(noteData.key);
-				// Small articulation gap between notes
 				const gap = 100 + Math.random() * 200;
 				randomPlayTimeout = setTimeout(scheduleNext, gap);
 			}, duration);
@@ -359,7 +412,6 @@ export default {
 		playSoothingMelody();
 	});
 
-	// === Global Event Listeners ===
 	window.addEventListener('keydown', (e) => {
 		const key = e.key.toLowerCase();
 		const noteData = NOTES.find(n => n.key === key);
@@ -377,8 +429,6 @@ export default {
 		}
 	});
 
-	// FIXED: Only clear manually held notes on blur to prevent "stuck" sounds.
-	// The random melody is explicitly allowed to continue playing in background tabs.
 	window.addEventListener('blur', () => {
 		if (!isRandomPlaying) {
 			Object.keys(activeNotes).forEach(key => stopNote(key));
