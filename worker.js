@@ -219,7 +219,7 @@ export default {
 	
 	/* Hand grab mode toggle button */
 	#handGrabModeBtn {
-		margin-top: 25px;
+		margin-top: 0;
 		background: linear-gradient(180deg, #2c5e4a 0%, #16352c 100%);
 		border-color: #5a9e8b;
 	}
@@ -275,9 +275,8 @@ export default {
 		display: none;
 		flex-direction: column;
 		gap: 16px;
-		margin-top: 15px;
-		width: 90%;
-		max-width: 320px;
+		margin-top: 12px;
+		width: 100%;
 		background: rgba(32, 13, 1, 0.95);
 		border: 2px solid #8b5a2b;
 		border-radius: 12px;
@@ -410,67 +409,67 @@ export default {
 		<button id="complexPlayBtn" class="random-btn complex">🎼 بداهه پیچیده </button>
 	</div>
 
+	<!-- Expandable Parameters Menu (Moved here to be directly under complex-play button) -->
+	<div id="paramsMenu" class="params-menu">
+		<div class="param-row">
+			<div class="param-header"><span>Phrase Length (Notes)</span></div>
+			<div class="param-input-group">
+				<input type="range" class="param-slider" id="slider-phraseLength" min="4" max="12" step="1" value="6">
+				<input type="number" class="param-number" id="num-phraseLength" min="4" max="12" step="1" value="6">
+			</div>
+		</div>
+		<div class="param-row">
+			<div class="param-header"><span>Harmony Chance (%)</span></div>
+			<div class="param-input-group">
+				<input type="range" class="param-slider" id="slider-harmonyChance" min="0" max="100" step="5" value="45">
+				<input type="number" class="param-number" id="num-harmonyChance" min="0" max="100" step="5" value="45">
+			</div>
+		</div>
+		<div class="param-row">
+			<div class="param-header"><span>Tempo Multiplier (x)</span></div>
+			<div class="param-input-group">
+				<input type="range" class="param-slider" id="slider-tempo" min="0.5" max="2.0" step="0.1" value="1.0">
+				<input type="number" class="param-number" id="num-tempo" min="0.5" max="2.0" step="0.1" value="1.0">
+			</div>
+		</div>
+		<div class="param-row">
+			<div class="param-header"><span>Rest Duration (ms)</span></div>
+			<div class="param-input-group">
+				<input type="range" class="param-slider" id="slider-restDuration" min="1800" max="4000" step="100" value="2900">
+				<input type="number" class="param-number" id="num-restDuration" min="1800" max="4000" step="100" value="2900">
+			</div>
+		</div>
+		<div class="param-row">
+			<div class="param-header"><span>Drone Duration (ms)</span></div>
+			<div class="param-input-group">
+				<input type="range" class="param-slider" id="slider-droneDuration" min="8000" max="15000" step="500" value="11500">
+				<input type="number" class="param-number" id="num-droneDuration" min="8000" max="15000" step="500" value="11500">
+			</div>
+		</div>
+		<div class="param-row">
+			<div class="param-header"><span>Drone Continue Chance (%)</span></div>
+			<div class="param-input-group">
+				<input type="range" class="param-slider" id="slider-droneContinueChance" min="0" max="100" step="5" value="60">
+				<input type="number" class="param-number" id="num-droneContinueChance" min="0" max="100" step="5" value="60">
+			</div>
+		</div>
+		<div class="param-row">
+			<div class="param-header"><span>Contour Bias (-100 Falling to 100 Rising)</span></div>
+			<div class="param-input-group">
+				<input type="range" class="param-slider" id="slider-contourBias" min="-100" max="100" step="10" value="0">
+				<input type="number" class="param-number" id="num-contourBias" min="-100" max="100" step="10" value="0">
+			</div>
+		</div>
+		
+		<button id="resetParamsBtn" class="random-btn" style="margin-top: 10px; font-size: 0.9rem; padding: 10px;">🔄 بازگشت به پیش‌فرض (Reset Defaults)</button>
+		<div id="cacheStatus" class="cache-status">✓ Saved</div>
+	</div>
+
 	<!-- Hand Grab Mode Toggle Button -->
 	<button id="handGrabModeBtn" class="random-btn">✋ حالت دست گرفتن</button>
 
 	<!-- Source Button (Hidden in hand-grab mode via .btn-group rule) -->
-	<button id="sourceBtn" class="random-btn source-btn">🔗 Source (منبع)</button>
-</div>
-
-<!-- Expandable Parameters Menu -->
-<div id="paramsMenu" class="params-menu">
-	<div class="param-row">
-		<div class="param-header"><span>Phrase Length (Notes)</span></div>
-		<div class="param-input-group">
-			<input type="range" class="param-slider" id="slider-phraseLength" min="4" max="12" step="1" value="6">
-			<input type="number" class="param-number" id="num-phraseLength" min="4" max="12" step="1" value="6">
-		</div>
-	</div>
-	<div class="param-row">
-		<div class="param-header"><span>Harmony Chance (%)</span></div>
-		<div class="param-input-group">
-			<input type="range" class="param-slider" id="slider-harmonyChance" min="0" max="100" step="5" value="45">
-			<input type="number" class="param-number" id="num-harmonyChance" min="0" max="100" step="5" value="45">
-		</div>
-	</div>
-	<div class="param-row">
-		<div class="param-header"><span>Tempo Multiplier (x)</span></div>
-		<div class="param-input-group">
-			<input type="range" class="param-slider" id="slider-tempo" min="0.5" max="2.0" step="0.1" value="1.0">
-			<input type="number" class="param-number" id="num-tempo" min="0.5" max="2.0" step="0.1" value="1.0">
-		</div>
-	</div>
-	<div class="param-row">
-		<div class="param-header"><span>Rest Duration (ms)</span></div>
-		<div class="param-input-group">
-			<input type="range" class="param-slider" id="slider-restDuration" min="1800" max="4000" step="100" value="2900">
-			<input type="number" class="param-number" id="num-restDuration" min="1800" max="4000" step="100" value="2900">
-		</div>
-	</div>
-	<div class="param-row">
-		<div class="param-header"><span>Drone Duration (ms)</span></div>
-		<div class="param-input-group">
-			<input type="range" class="param-slider" id="slider-droneDuration" min="8000" max="15000" step="500" value="11500">
-			<input type="number" class="param-number" id="num-droneDuration" min="8000" max="15000" step="500" value="11500">
-		</div>
-	</div>
-	<div class="param-row">
-		<div class="param-header"><span>Drone Continue Chance (%)</span></div>
-		<div class="param-input-group">
-			<input type="range" class="param-slider" id="slider-droneContinueChance" min="0" max="100" step="5" value="60">
-			<input type="number" class="param-number" id="num-droneContinueChance" min="0" max="100" step="5" value="60">
-		</div>
-	</div>
-	<div class="param-row">
-		<div class="param-header"><span>Contour Bias (-100 Falling to 100 Rising)</span></div>
-		<div class="param-input-group">
-			<input type="range" class="param-slider" id="slider-contourBias" min="-100" max="100" step="10" value="0">
-			<input type="number" class="param-number" id="num-contourBias" min="-100" max="100" step="10" value="0">
-		</div>
-	</div>
-	
-	<button id="resetParamsBtn" class="random-btn" style="margin-top: 10px; font-size: 0.9rem; padding: 10px;">🔄 بازگشت به پیش‌فرض (Reset Defaults)</button>
-	<div id="cacheStatus" class="cache-status">✓ Saved</div>
+	<button id="sourceBtn" class="random-btn source-btn">🔗 Source </button>
 </div>
 
 <!-- Back Button (visible only in hand grab mode) -->
