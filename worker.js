@@ -51,6 +51,7 @@ export default {
 		gap: 8px; 
 		perspective: 1000px; 
 		flex-wrap: wrap; 
+		flex-direction: row-reverse; /* Reversed so highest frequency (closest to mouthpiece) is on the left */
 		justify-content: center; 
 		padding: 0 5px; 
 	}
@@ -89,6 +90,7 @@ export default {
 		background: linear-gradient(90deg, #4a2c17, #8b5a2b, #4a2c17);
 		border-radius: 20px; 
 		display: flex; 
+		flex-direction: row-reverse; /* Reversed so highest frequency (closest to mouthpiece) is on the left */
 		justify-content: space-around; 
 		align-items: center;
 		box-shadow: inset 0 -5px 10px rgba(0,0,0,0.5), 0 5px 15px rgba(0,0,0,0.5);
@@ -289,16 +291,16 @@ export default {
 	 */
 
 	const NOTES = [
-		{ key: 'a', note: 'A3', freq: 220.00 },
-		{ key: 's', note: 'C4', freq: 261.63 },
-		{ key: 'd', note: 'D4', freq: 293.66 },
-		{ key: 'f', note: 'E4', freq: 329.63 },
-		{ key: 'g', note: 'G4', freq: 392.00 },
-		{ key: 'h', note: 'A4', freq: 440.00 },
-		{ key: 'j', note: 'C5', freq: 523.25 },
-		{ key: 'k', note: 'D5', freq: 587.33 },
-		{ key: 'l', note: 'E5', freq: 659.25 },
-		{ key: ';', note: 'G5', freq: 783.99 }
+		{ key: ';', note: 'A3', freq: 220.00 },
+		{ key: 'l', note: 'C4', freq: 261.63 },
+		{ key: 'k', note: 'D4', freq: 293.66 },
+		{ key: 'j', note: 'E4', freq: 329.63 },
+		{ key: 'h', note: 'G4', freq: 392.00 },
+		{ key: 'g', note: 'A4', freq: 440.00 },
+		{ key: 'f', note: 'C5', freq: 523.25 },
+		{ key: 'd', note: 'D5', freq: 587.33 },
+		{ key: 's', note: 'E5', freq: 659.25 },
+		{ key: 'a', note: 'G5', freq: 783.99 }
 	];
 
 	const keyboardEl = document.getElementById('keyboard');
