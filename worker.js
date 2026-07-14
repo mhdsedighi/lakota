@@ -336,6 +336,20 @@ export default {
 		border-color: #d4a373;
 	}
 	
+	/* Cache status indicator */
+	.cache-status {
+		font-size: 0.75rem;
+		color: #8b5a2b;
+		text-align: center;
+		margin-top: 4px;
+		opacity: 0;
+		transition: opacity 0.3s ease;
+		font-style: italic;
+	}
+	.cache-status.visible {
+		opacity: 1;
+	}
+	
 	/* Back button - centered at the top, clearly above the flute to prevent accidental touch */
 	#backBtn {
 		display: none;
@@ -439,6 +453,7 @@ export default {
 	</div>
 	
 	<button id="resetParamsBtn" class="random-btn" style="margin-top: 10px; font-size: 0.9rem; padding: 10px;">🔄 بازگشت به پیش‌فرض (Reset Defaults)</button>
+	<div id="cacheStatus" class="cache-status">✓ Saved</div>
 </div>
 
 <!-- Hand Grab Mode Toggle Button -->
@@ -828,6 +843,70 @@ export default {
 
 	const complexParams = { ...defaultParams };
 
+	// === NEW: Browser Cache (localStorage) Persistence ===
+	const CACHE_KEY = 'lakotaFluteComplexParams';
+	const CACHE_STATUS_DURATION = 1500; // ms to show "✓ Saved" indicator
+	let cacheStatusTimeout = null;
+
+	// Read all parameters from browser cache on startup
+	function loadParamsFromCache() {
+		try {
+			const cached = localStorage.getItem(CACHE_KEY);
+			if (cached) {
+				const parsed = JSON.parse(cached);
+				let loadedCount = 0;
+				for (const key in defaultParams) {
+					if (parsed[key] !== undefined && !isNaN(parsed[key])) {
+						complexParams[key] = parsed[key];
+						loadedCount++;
+					}
+				}
+				console.log('[Cache] Loaded ' + loadedCount + ' parameters from browser cache:', { ...complexParams });
+			} else {
+				console.log('[Cache] No cached parameters found. Using defaults:', { ...complexParams });
+			}
+		} catch (e) {
+			console.warn('[Cache] Failed to load parameters from browser cache:', e);
+		}
+	}
+
+	// Write the latest set values to browser cache
+	function saveParamsToCache() {
+		try {
+			localStorage.setItem(CACHE_KEY, JSON.stringify(complexParams));
+			console.log('[Cache] Saved latest parameters to browser cache:', { ...complexParams });
+			showCacheStatus('✓ Saved');
+		} catch (e) {
+			console.warn('[Cache] Failed to save parameters to browser cache:', e);
+			showCacheStatus('✗ Save failed');
+		}
+	}
+
+	// Show a brief visual indicator that values were saved
+	function showCacheStatus(message) {
+		const statusEl = document.getElementById('cacheStatus');
+		if (!statusEl) return;
+		statusEl.textContent = message;
+		statusEl.classList.add('visible');
+		if (cacheStatusTimeout) clearTimeout(cacheStatusTimeout);
+		cacheStatusTimeout = setTimeout(() => {
+			statusEl.classList.remove('visible');
+		}, CACHE_STATUS_DURATION);
+	}
+
+	// Sync all UI controls (sliders + number inputs) with the current complexParams values
+	function syncUIWithParams() {
+		for (const key in complexParams) {
+			const slider = document.getElementById('slider-' + key);
+			const numInput = document.getElementById('num-' + key);
+			if (slider) slider.value = complexParams[key];
+			if (numInput) numInput.value = complexParams[key];
+		}
+	}
+
+	// Load cached params immediately after defining complexParams
+	loadParamsFromCache();
+
 	function startDrone(noteKey) {
 		if (currentDroneKey) stopDrone();
 		const noteData = NOTES.find(n => n.key === noteKey);
@@ -893,6 +972,7 @@ export default {
 				baseDuration = 700 + Math.random() * 1100;
 			}
 			
+			// Read dynamically from complexParams: higher tempo = shorter duration
 			const duration = baseDuration / complexParams.tempo;
 			
 			phrase.push({ noteKey, harmonyKey, duration });
@@ -1003,6 +1083,8 @@ export default {
 			complexParams[paramKey] = parsed;
 			slider.value = parsed;
 			numInput.value = parsed;
+
+			saveParamsToCache();
 		};
 		
 		slider.addEventListener('input', (e) => updateValue(e.target.value));
@@ -1022,14 +1104,17 @@ export default {
 	function resetToDefaults() {
 		for (const key in defaultParams) {
 			complexParams[key] = defaultParams[key];
-			const slider = document.getElementById('slider-' + key);
-			const numInput = document.getElementById('num-' + key);
-			if (slider) slider.value = defaultParams[key];
-			if (numInput) numInput.value = defaultParams[key];
 		}
+		// Sync UI with reset values
+		syncUIWithParams();
+		// Write the reset defaults to browser cache
+		saveParamsToCache();
 	}
 	
 	document.getElementById('resetParamsBtn').addEventListener('click', resetToDefaults);
+
+	// ensures sliders/inputs reflect the cached values, not just HTML defaults
+	syncUIWithParams();
 
 	// === Hand Grab Mode Toggle Logic ===
 	const handGrabModeBtn = document.getElementById('handGrabModeBtn');
