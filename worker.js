@@ -9,7 +9,7 @@ export default {
 <title>Lakota Flute Simulator</title>
 <style>
 	body {
-		background: linear-gradient(135deg, #2c1e16 0%, #4a2c17 100%);
+		background: linear-gradient(135deg, #200d01 0%, #200d01 100%);
 		color: #e8d5c4;
 		font-family: 'Georgia', serif;
 		display: flex;
@@ -28,7 +28,7 @@ export default {
 		border-radius: 12px;
 		box-shadow: 0 8px 20px rgba(0,0,0,0.4);
 		margin-bottom: 15px;
-		border: 3px solid #8b5a2b;
+		border: 3px solid #0e0d0dff;
 	}
 	h1 { 
 		font-size: 2rem; 
@@ -200,7 +200,8 @@ export default {
 		
 		const startPlaying = (e) => {
 			e.preventDefault();
-			stopAllNotes(); // Stop EVERYTHING before starting manual play
+			if (isRandomPlaying) stopRandomPlay();
+			if (isComplexPlaying) stopComplexPlay();
 			playNote(n.freq, n.key);
 		};
 		const stopPlaying = (e) => {
@@ -365,18 +366,11 @@ export default {
 		if (holeEl) holeEl.classList.remove('active');
 	}
 
-	// === NEW: Universal Note Stopper ===
-	function stopAllNotes() {
-		Object.keys(activeNotes).forEach(key => stopNote(key));
-		clearTimeout(randomPlayTimeout);
-		clearTimeout(complexPlayTimeout);
-		clearTimeout(droneTimeout);
-		randomPlayTimeout = null;
-		complexPlayTimeout = null;
-		droneTimeout = null;
-		isRandomPlaying = false;
-		isComplexPlaying = false;
-		currentDroneKey = null;
+	// === Unified Visual Cleanup ===
+	function clearAllVisuals() {
+		// Remove active class from ALL keys and holes
+		document.querySelectorAll('.key').forEach(el => el.classList.remove('active'));
+		document.querySelectorAll('.hole').forEach(el => el.classList.remove('active'));
 	}
 
 	// === Simple Random Melody ===
@@ -386,14 +380,12 @@ export default {
 
 	function stopRandomPlay() {
 		isRandomPlaying = false;
-		if (randomPlayTimeout) clearTimeout(randomPlayTimeout);
-		randomPlayTimeout = null;
-		// Only stop notes that belong to the simple mode
-		Object.keys(activeNotes).forEach(key => {
-			if (!key.startsWith('melody-') && !key.startsWith('harmony-') && !key.startsWith('drone-')) {
-				stopNote(key);
-			}
-		});
+		if (randomPlayTimeout) {
+			clearTimeout(randomPlayTimeout);
+			randomPlayTimeout = null;
+		}
+		Object.keys(activeNotes).forEach(key => stopNote(key));
+		clearAllVisuals(); // Ensure visuals are clean
 		randomBtn.classList.remove('active');
 		randomBtn.innerHTML = '🎵 فی البداهه';
 	}
@@ -478,8 +470,7 @@ export default {
 	}
 
 	function stopDrone() {
-		if (droneTimeout) clearTimeout(droneTimeout);
-		droneTimeout = null;
+		if (droneTimeout) { clearTimeout(droneTimeout); droneTimeout = null; }
 		if (currentDroneKey) {
 			stopNote('drone-' + currentDroneKey, currentDroneKey);
 			currentDroneKey = null;
@@ -584,8 +575,7 @@ export default {
 
 	function stopComplexPlay() {
 		isComplexPlaying = false;
-		if (complexPlayTimeout) clearTimeout(complexPlayTimeout);
-		complexPlayTimeout = null;
+		if (complexPlayTimeout) { clearTimeout(complexPlayTimeout); complexPlayTimeout = null; }
 		stopDrone();
 		// Stop only complex-mode notes
 		Object.keys(activeNotes).forEach(key => {
@@ -625,7 +615,8 @@ export default {
 		const noteData = NOTES.find(n => n.key === key);
 		if (noteData) {
 			e.preventDefault();
-			stopAllNotes(); // Critical: stop everything before manual play
+			if (isRandomPlaying) stopRandomPlay();
+			if (isComplexPlaying) stopComplexPlay();
 			playNote(noteData.freq, key);
 		}
 	});
@@ -636,7 +627,10 @@ export default {
 	});
 
 	window.addEventListener('blur', () => {
-		stopAllNotes();
+		if (!isRandomPlaying && !isComplexPlaying) {
+			Object.keys(activeNotes).forEach(key => stopNote(key));
+			clearAllVisuals();
+		}
 	});
 
 	document.body.addEventListener('click', initAudio, { once: true });
