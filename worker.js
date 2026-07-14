@@ -228,15 +228,38 @@ export default {
 	}
 
 	/* === NEW: Parameters Menu Styles === */
-	.params-btn {
-		background: linear-gradient(180deg, #4a3b2c 0%, #2c1e16 100%);
-		border-color: #8b5a2b;
-		font-size: 0.95rem;
-		padding: 12px 20px;
+	/* Row container that holds the complex button and the small params button side-by-side */
+	.complex-row {
+		display: flex;
+		flex-direction: row;
+		gap: 10px;
+		align-items: center;
+		width: 100%;
 	}
-	.params-btn:hover {
+	/* Small circular params icon button - positioned to the left of the complex button */
+	.small-params-btn {
+		width: 48px;
+		height: 48px;
+		padding: 0;
+		font-size: 1.3rem;
+		border-radius: 50%;
+		flex-shrink: 0;
+		background: linear-gradient(180deg, #4a3b2c 0%, #2c1e16 100%);
+		border: 2px solid #8b5a2b;
+	}
+	.small-params-btn:hover {
 		background: linear-gradient(180deg, #6b5540 0%, #4a3b2c 100%);
 	}
+	.small-params-btn.active {
+		background: linear-gradient(180deg, #d4a373 0%, #8b5a2b 100%);
+		color: #2c1e16;
+		border-color: #d4a373;
+	}
+	/* Complex button expands to fill the remaining space in the row */
+	.complex-row .random-btn.complex {
+		flex: 1;
+	}
+	
 	.params-menu {
 		display: none;
 		flex-direction: column;
@@ -355,8 +378,12 @@ export default {
 
 <div class="btn-group">
 	<button id="randomPlayBtn" class="random-btn">🎵 فی البداهه</button>
-	<button id="complexPlayBtn" class="random-btn complex">🎼 فی البداهه پیچیده</button>
-	<button id="paramsToggleBtn" class="random-btn params-btn">⚙️ Parameters (پارامترها)</button>
+	
+	<!-- Complex button + small params button in a single row -->
+	<div class="complex-row">
+		<button id="paramsToggleBtn" class="random-btn small-params-btn" title="Parameters (پارامترها)">⚙️</button>
+		<button id="complexPlayBtn" class="random-btn complex">🎼 فی البداهه پیچیده</button>
+	</div>
 </div>
 
 <!-- Expandable Parameters Menu -->
@@ -955,6 +982,8 @@ export default {
 	
 	paramsToggleBtn.addEventListener('click', () => {
 		paramsMenu.classList.toggle('open');
+		// Toggle active state on the small params button for visual feedback
+		paramsToggleBtn.classList.toggle('active');
 	});
 
 	function bindParamControl(paramKey, sliderId, numId, min, max, step) {
