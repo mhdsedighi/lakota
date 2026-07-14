@@ -402,12 +402,12 @@ export default {
 <div class="vertical-flute" id="verticalFlute"></div>
 
 <div class="btn-group">
-	<button id="randomPlayBtn" class="random-btn">🎵 فی البداهه</button>
+	<button id="randomPlayBtn" class="random-btn">🎵  بداهه تک دکمه  </button>
 	
 	<!-- Complex button + small params button in a single row -->
 	<div class="complex-row">
-		<button id="paramsToggleBtn" class="random-btn small-params-btn" title="Parameters (پارامترها)">⚙️</button>
-		<button id="complexPlayBtn" class="random-btn complex">🎼 فی البداهه پیچیده</button>
+		<button id="paramsToggleBtn" class="random-btn small-params-btn" title="Parameters - پارامترها">⚙️</button>
+		<button id="complexPlayBtn" class="random-btn complex">🎼 بداهه پیچیده </button>
 	</div>
 
 	<!-- Hand Grab Mode Toggle Button -->
@@ -778,7 +778,7 @@ export default {
 		Object.keys(activeNotes).forEach(key => stopNote(key));
 		clearAllVisuals(); // Ensure visuals are clean
 		randomBtn.classList.remove('active');
-		randomBtn.innerHTML = '🎵 فی البداهه';
+		randomBtn.innerHTML = '🎵  بداهه تک دکمه  ';
 	}
 
 	function playSoothingMelody() {
@@ -1049,7 +1049,7 @@ export default {
 		clearAllVisuals();
 		
 		complexBtn.classList.remove('active');
-		complexBtn.innerHTML = '🎼 فی البداهه پیچیده';
+		complexBtn.innerHTML = '🎼 بداهه پیچیده ';
 	}
 
 	function playComplexMelody() {
