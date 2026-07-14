@@ -200,8 +200,7 @@ export default {
 		
 		const startPlaying = (e) => {
 			e.preventDefault();
-			if (isRandomPlaying) stopRandomPlay();
-			if (isComplexPlaying) stopComplexPlay();
+			stopAllNotes(); // Stop EVERYTHING before starting manual play
 			playNote(n.freq, n.key);
 		};
 		const stopPlaying = (e) => {
@@ -366,6 +365,20 @@ export default {
 		if (holeEl) holeEl.classList.remove('active');
 	}
 
+	// === NEW: Universal Note Stopper ===
+	function stopAllNotes() {
+		Object.keys(activeNotes).forEach(key => stopNote(key));
+		clearTimeout(randomPlayTimeout);
+		clearTimeout(complexPlayTimeout);
+		clearTimeout(droneTimeout);
+		randomPlayTimeout = null;
+		complexPlayTimeout = null;
+		droneTimeout = null;
+		isRandomPlaying = false;
+		isComplexPlaying = false;
+		currentDroneKey = null;
+	}
+
 	// === Simple Random Melody ===
 	let randomPlayTimeout = null;
 	let isRandomPlaying = false;
@@ -373,11 +386,14 @@ export default {
 
 	function stopRandomPlay() {
 		isRandomPlaying = false;
-		if (randomPlayTimeout) {
-			clearTimeout(randomPlayTimeout);
-			randomPlayTimeout = null;
-		}
-		Object.keys(activeNotes).forEach(key => stopNote(key));
+		if (randomPlayTimeout) clearTimeout(randomPlayTimeout);
+		randomPlayTimeout = null;
+		// Only stop notes that belong to the simple mode
+		Object.keys(activeNotes).forEach(key => {
+			if (!key.startsWith('melody-') && !key.startsWith('harmony-') && !key.startsWith('drone-')) {
+				stopNote(key);
+			}
+		});
 		randomBtn.classList.remove('active');
 		randomBtn.innerHTML = '🎵 فی البداهه';
 	}
@@ -431,16 +447,10 @@ export default {
 	let currentDroneKey = null;
 	let droneTimeout = null;
 
-	// Consonant harmony pairs (4ths, 5ths, octaves in A minor pentatonic)
 	const harmonyMap = {
-		'a': ['f', 'h'],       // A3 + E4 (5th) or A3 + A4 (8ve)
-		's': ['g', 'j'],       // C4 + G4 (5th) or C4 + C5 (8ve)
-		'd': ['g', 'h'],       // D4 + G4 (4th) or D4 + A4 (5th)
-		'f': ['a', 'h'],       // E4 + A3 (4th) or E4 + A4 (4th)
-		'g': ['d', 'j'],       // G4 + D4 (4th) or G4 + C5 (4th)
-		'h': ['f', 'd'],       // A4 + E4 (4th) or A4 + D4 (5th)
-		'j': ['g', 'h'],       // C5 + G4 (4th) or C5 + A4 (3rd)
-		'k': ['h', 'g']        // D5 + A4 (5th) or D5 + G4
+		'a': ['f', 'h'], 's': ['g', 'j'], 'd': ['g', 'h'],
+		'f': ['a', 'h'], 'g': ['d', 'j'], 'h': ['f', 'd'],
+		'j': ['g', 'h'], 'k': ['h', 'g']
 	};
 
 	function pickHarmony(melodyKey) {
@@ -468,7 +478,8 @@ export default {
 	}
 
 	function stopDrone() {
-		if (droneTimeout) { clearTimeout(droneTimeout); droneTimeout = null; }
+		if (droneTimeout) clearTimeout(droneTimeout);
+		droneTimeout = null;
 		if (currentDroneKey) {
 			stopNote('drone-' + currentDroneKey, currentDroneKey);
 			currentDroneKey = null;
@@ -527,7 +538,6 @@ export default {
 			phrase.push({ noteKey, harmonyKey, duration });
 			prevIdx = nextIdx;
 		}
-		
 		return phrase;
 	}
 
@@ -574,9 +584,10 @@ export default {
 
 	function stopComplexPlay() {
 		isComplexPlaying = false;
-		if (complexPlayTimeout) { clearTimeout(complexPlayTimeout); complexPlayTimeout = null; }
+		if (complexPlayTimeout) clearTimeout(complexPlayTimeout);
+		complexPlayTimeout = null;
 		stopDrone();
-		// Stop all melody and harmony notes
+		// Stop only complex-mode notes
 		Object.keys(activeNotes).forEach(key => {
 			if (key.startsWith('melody-') || key.startsWith('harmony-')) {
 				stopNote(key);
@@ -614,8 +625,7 @@ export default {
 		const noteData = NOTES.find(n => n.key === key);
 		if (noteData) {
 			e.preventDefault();
-			if (isRandomPlaying) stopRandomPlay();
-			if (isComplexPlaying) stopComplexPlay();
+			stopAllNotes(); // Critical: stop everything before manual play
 			playNote(noteData.freq, key);
 		}
 	});
@@ -626,9 +636,7 @@ export default {
 	});
 
 	window.addEventListener('blur', () => {
-		if (!isRandomPlaying && !isComplexPlaying) {
-			Object.keys(activeNotes).forEach(key => stopNote(key));
-		}
+		stopAllNotes();
 	});
 
 	document.body.addEventListener('click', initAudio, { once: true });
