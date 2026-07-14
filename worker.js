@@ -287,7 +287,7 @@ export default {
 	 * 4. Infinite Counter Fix: noteCounter is now reset in stopComplexPlay().
 	 * 5. Accessibility: Keys and holes have role="button", tabIndex, and aria-labels.
 	 * 6. Hand Grab Mode: Vertical flute with finger-friendly touch targets (55px) and proper margins.
-	 * 7. Note: The ';' key for G5 is US ANSI layout specific. International users may need adaptation.
+	 * 7. Note: The 'a' key for G5 is US ANSI layout specific. International users may need adaptation.
 	 */
 
 	const NOTES = [
@@ -589,9 +589,9 @@ export default {
 		randomBtn.innerHTML = '⏹ توقف';
 
 		const soothingNotes = [
-			{ key: 'a', weight: 4 }, { key: 's', weight: 2 },
-			{ key: 'd', weight: 3 }, { key: 'f', weight: 3 },
-			{ key: 'g', weight: 4 }, { key: 'h', weight: 2 }
+			{ key: ';', weight: 4 }, { key: 'l', weight: 2 },
+			{ key: 'k', weight: 3 }, { key: 'j', weight: 3 },
+			{ key: 'h', weight: 4 }, { key: 'g', weight: 2 }
 		];
 		
 		function scheduleNext() {
@@ -629,9 +629,9 @@ export default {
 	let droneTimeout = null;
 
 	const harmonyMap = {
-		'a': ['f', 'h'], 's': ['g', 'j'], 'd': ['g', 'h'],
-		'f': ['a', 'h'], 'g': ['d', 'j'], 'h': ['f', 'd'],
-		'j': ['g', 'h'], 'k': ['h', 'g']
+		';': ['j', 'g'], 'l': ['h', 'f'], 'k': ['h', 'g'],
+		'j': [';', 'g'], 'h': ['k', 'f'], 'g': ['j', 'k'],
+		'f': ['h', 'g'], 'd': ['g', 'h']
 	};
 
 	function pickHarmony(melodyKey) {
@@ -651,7 +651,7 @@ export default {
 			stopDrone();
 			// 60% chance to start a new drone
 			if (isComplexPlaying && Math.random() < 0.6) {
-				const droneOptions = ['a', 'g', 'f'];
+				const droneOptions = [';', 'h', 'j'];
 				const newDrone = droneOptions[Math.floor(Math.random() * droneOptions.length)];
 				startDrone(newDrone);
 			}
@@ -667,7 +667,7 @@ export default {
 	}
 
 	function generateComplexPhrase() {
-		const melodyRange = ['a', 's', 'd', 'f', 'g', 'h', 'j', 'k'];
+		const melodyRange = [';', 'l', 'k', 'j', 'h', 'g', 'f', 'd'];
 		const length = 4 + Math.floor(Math.random() * 5); // 4-8 notes
 		const phrase = [];
 		
@@ -787,7 +787,7 @@ export default {
 		complexBtn.innerHTML = '⏹ توقف';
 		
 		// Start with a drone
-		const droneOptions = ['a', 'g', 'f'];
+		const droneOptions = [';', 'h', 'j'];
 		const initialDrone = droneOptions[Math.floor(Math.random() * droneOptions.length)];
 		startDrone(initialDrone);
 		
