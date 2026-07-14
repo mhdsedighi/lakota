@@ -662,7 +662,7 @@ export default {
 		whiteNoise.start(now);
 		lfo.start(now);
 
-		activeNotes[key] = { osc, whiteNoise, lfo, oscGain, noiseGain, lfoGain, lowpass, bandpass };
+		activeNotes[key] = { osc, whiteNoise, lfo, oscGain, noiseGain, lfoGain, lowpass, bandpass, displayKey };
 		
 		// Update visuals for ALL representations (key, horizontal hole, vertical hole)
 		const keyEl = document.getElementById('key-' + displayKey);
@@ -713,14 +713,18 @@ export default {
 
 		delete activeNotes[key];
 
-		// Clear visuals for ALL representations
-		const keyEl = document.getElementById('key-' + displayKey);
-		const holeEl = document.getElementById('hole-' + displayKey);
-		const vHoleEl = document.getElementById('v-hole-' + displayKey);
+		const isDisplayKeyStillActive = Object.values(activeNotes).some(n => n.displayKey === displayKey);
 		
-		if (keyEl) keyEl.classList.remove('active');
-		if (holeEl) holeEl.classList.remove('active');
-		if (vHoleEl) vHoleEl.classList.remove('active');
+		if (!isDisplayKeyStillActive) {
+			// Clear visuals for ALL representations
+			const keyEl = document.getElementById('key-' + displayKey);
+			const holeEl = document.getElementById('hole-' + displayKey);
+			const vHoleEl = document.getElementById('v-hole-' + displayKey);
+			
+			if (keyEl) keyEl.classList.remove('active');
+			if (holeEl) holeEl.classList.remove('active');
+			if (vHoleEl) vHoleEl.classList.remove('active');
+		}
 	}
 
 	// === Unified Visual Cleanup ===
