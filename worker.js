@@ -641,7 +641,8 @@ export default {
 		return new Response(html, {
 			headers: {
 				'content-type': 'text/html;charset=UTF-8',
-				'cache-control': 'public, max-age=86400, s-maxage=86400',
+				'cache-control': 'no-cache, must-revalidate',
+				'cf-cache-status': 'BYPASS',
 			},
 		});
 	},
