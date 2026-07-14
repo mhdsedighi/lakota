@@ -106,8 +106,15 @@ export default {
 		box-shadow: 0 0 15px #d4a373, inset 0 2px 4px rgba(0,0,0,0.8); 
 	}
 	
-	.random-btn {
+	.btn-group {
+		display: flex;
+		flex-direction: column;
+		gap: 12px;
 		margin-top: 25px;
+		width: 90%;
+		max-width: 320px;
+	}
+	.random-btn {
 		padding: 14px 28px;
 		font-size: 1.1rem;
 		font-family: 'Georgia', serif;
@@ -120,6 +127,7 @@ export default {
 		transition: all 0.3s ease;
 		display: flex;
 		align-items: center;
+		justify-content: center;
 		gap: 8px;
 		touch-action: manipulation;
 		-webkit-tap-highlight-color: transparent;
@@ -135,6 +143,18 @@ export default {
 		font-weight: bold;
 		border-color: #d4a373;
 	}
+	.random-btn.complex {
+		background: linear-gradient(180deg, #4a2c5e 0%, #2c1635 100%);
+		border-color: #8b5a9e;
+	}
+	.random-btn.complex:hover {
+		background: linear-gradient(180deg, #6b4480 0%, #4a2c5e 100%);
+	}
+	.random-btn.complex.active {
+		background: linear-gradient(180deg, #c49ed4 0%, #8b5a9e 100%);
+		color: #2c1635;
+		border-color: #c49ed4;
+	}
 </style>
 </head>
 <body>
@@ -147,7 +167,10 @@ export default {
 <div class="keyboard" id="keyboard"></div>
 <div class="flute-visual" id="fluteVisual"></div>
 
-<button id="randomPlayBtn" class="random-btn">فی البداهه</button>
+<div class="btn-group">
+	<button id="randomPlayBtn" class="random-btn">🎵 فی البداهه</button>
+	<button id="complexPlayBtn" class="random-btn complex">🎼 فی البداهه پیچیده</button>
+</div>
 
 <script>
 	const NOTES = [
@@ -178,6 +201,7 @@ export default {
 		const startPlaying = (e) => {
 			e.preventDefault();
 			if (isRandomPlaying) stopRandomPlay();
+			if (isComplexPlaying) stopComplexPlay();
 			playNote(n.freq, n.key);
 		};
 		const stopPlaying = (e) => {
@@ -242,7 +266,8 @@ export default {
 		}
 	}
 
-	function playNote(freq, key) {
+	// displayKey allows the audio tracking ID to differ from the visual key
+	function playNote(freq, key, displayKey = key) {
 		if (activeNotes[key]) return;
 		initAudio();
 		if (audioCtx.state === 'suspended') audioCtx.resume();
@@ -266,22 +291,18 @@ export default {
 		whiteNoise.buffer = noiseBuffer;
 		whiteNoise.loop = true;
 
-		// === FIXED FOR MOBILE: Softer breath noise ===
 		const bandpass = audioCtx.createBiquadFilter();
 		bandpass.type = 'bandpass';
-		// Cap the frequency to prevent harsh hissing on high notes
-		bandpass.frequency.value = Math.min(freq * 1.2, 2500); 
-		bandpass.Q.value = 1.0; // Smoother, less "whistly"
+		bandpass.frequency.value = Math.min(freq * 1.2, 2500);
+		bandpass.Q.value = 1.0;
 
-		// Add a lowpass filter to cut harsh high frequencies that cause mobile speaker distortion
 		const lowpass = audioCtx.createBiquadFilter();
 		lowpass.type = 'lowpass';
-		lowpass.frequency.value = 3500; 
+		lowpass.frequency.value = 3500;
 
 		const noiseGain = audioCtx.createGain();
 		noiseGain.gain.setValueAtTime(0.0001, now);
-		// Reduced peak gain from 0.08 to 0.04 for mobile friendliness
-		noiseGain.gain.linearRampToValueAtTime(0.04, now + attackTime); 
+		noiseGain.gain.linearRampToValueAtTime(0.04, now + attackTime);
 		noiseGain.gain.exponentialRampToValueAtTime(0.015, now + attackTime + decayTime);
 
 		const lfo = audioCtx.createOscillator();
@@ -293,12 +314,11 @@ export default {
 		lfo.connect(lfoGain);
 		lfoGain.connect(osc.frequency);
 
-		// Connect graph with new lowpass filter
 		osc.connect(oscGain);
 		oscGain.connect(masterGain);
 		
 		whiteNoise.connect(bandpass);
-		bandpass.connect(lowpass); // <-- New filter chain
+		bandpass.connect(lowpass);
 		lowpass.connect(noiseGain);
 		noiseGain.connect(masterGain);
 
@@ -306,16 +326,15 @@ export default {
 		whiteNoise.start(now);
 		lfo.start(now);
 
-		// Store lowpass in activeNotes for proper cleanup
 		activeNotes[key] = { osc, whiteNoise, lfo, oscGain, noiseGain, lfoGain, lowpass };
 		
-		const keyEl = document.getElementById('key-' + key);
-		const holeEl = document.getElementById('hole-' + key);
+		const keyEl = document.getElementById('key-' + displayKey);
+		const holeEl = document.getElementById('hole-' + displayKey);
 		if (keyEl) keyEl.classList.add('active');
 		if (holeEl) holeEl.classList.add('active');
 	}
 
-	function stopNote(key) {
+	function stopNote(key, displayKey = key) {
 		const note = activeNotes[key];
 		if (!note) return;
 		
@@ -341,13 +360,13 @@ export default {
 
 		delete activeNotes[key];
 
-		const keyEl = document.getElementById('key-' + key);
-		const holeEl = document.getElementById('hole-' + key);
+		const keyEl = document.getElementById('key-' + displayKey);
+		const holeEl = document.getElementById('hole-' + displayKey);
 		if (keyEl) keyEl.classList.remove('active');
 		if (holeEl) holeEl.classList.remove('active');
 	}
 
-	// === Random Soothing Melody Logic ===
+	// === Simple Random Melody ===
 	let randomPlayTimeout = null;
 	let isRandomPlaying = false;
 	const randomBtn = document.getElementById('randomPlayBtn');
@@ -360,89 +379,254 @@ export default {
 		}
 		Object.keys(activeNotes).forEach(key => stopNote(key));
 		randomBtn.classList.remove('active');
-		randomBtn.innerHTML = 'فی البداهه';
+		randomBtn.innerHTML = '🎵 فی البداهه';
 	}
 
 	function playSoothingMelody() {
-		if (isRandomPlaying) {
-			stopRandomPlay();
-			return;
-		}
+		if (isRandomPlaying) { stopRandomPlay(); return; }
+		if (isComplexPlaying) stopComplexPlay();
 		
 		isRandomPlaying = true;
 		initAudio();
 		randomBtn.classList.add('active');
-		randomBtn.innerHTML = 'توقف';
+		randomBtn.innerHTML = '⏹ توقف';
 
 		const soothingNotes = [
-			{ key: 'a', weight: 4 },
-			{ key: 's', weight: 2 },
-			{ key: 'd', weight: 3 },
-			{ key: 'f', weight: 3 },
-			{ key: 'g', weight: 4 },
-			{ key: 'h', weight: 2 }
+			{ key: 'a', weight: 4 }, { key: 's', weight: 2 },
+			{ key: 'd', weight: 3 }, { key: 'f', weight: 3 },
+			{ key: 'g', weight: 4 }, { key: 'h', weight: 2 }
 		];
 		
 		function scheduleNext() {
 			if (!isRandomPlaying) return;
-
 			if (Math.random() < 0.25) {
-				const restDuration = 600 + Math.random() * 800;
-				randomPlayTimeout = setTimeout(scheduleNext, restDuration);
+				randomPlayTimeout = setTimeout(scheduleNext, 600 + Math.random() * 800);
 				return;
 			}
-
 			const totalWeight = soothingNotes.reduce((sum, n) => sum + n.weight, 0);
 			let random = Math.random() * totalWeight;
 			let selected = soothingNotes[0];
-			
 			for (const n of soothingNotes) {
 				random -= n.weight;
-				if (random <= 0) {
-					selected = n;
-					break;
-				}
+				if (random <= 0) { selected = n; break; }
 			}
-
 			const noteData = NOTES.find(n => n.key === selected.key);
 			const duration = 1200 + Math.random() * 1800;
-
 			playNote(noteData.freq, noteData.key);
-			
 			randomPlayTimeout = setTimeout(() => {
 				stopNote(noteData.key);
-				const gap = 100 + Math.random() * 200;
-				randomPlayTimeout = setTimeout(scheduleNext, gap);
+				randomPlayTimeout = setTimeout(scheduleNext, 100 + Math.random() * 200);
 			}, duration);
 		}
-
 		scheduleNext();
 	}
 
-	randomBtn.addEventListener('click', () => {
-		initAudio();
-		playSoothingMelody();
-	});
+	randomBtn.addEventListener('click', () => { initAudio(); playSoothingMelody(); });
 
+	// === Complex Polyphonic Melody ===
+	let complexPlayTimeout = null;
+	let isComplexPlaying = false;
+	const complexBtn = document.getElementById('complexPlayBtn');
+	let noteCounter = 0;
+	let currentDroneKey = null;
+	let droneTimeout = null;
+
+	// Consonant harmony pairs (4ths, 5ths, octaves in A minor pentatonic)
+	const harmonyMap = {
+		'a': ['f', 'h'],       // A3 + E4 (5th) or A3 + A4 (8ve)
+		's': ['g', 'j'],       // C4 + G4 (5th) or C4 + C5 (8ve)
+		'd': ['g', 'h'],       // D4 + G4 (4th) or D4 + A4 (5th)
+		'f': ['a', 'h'],       // E4 + A3 (4th) or E4 + A4 (4th)
+		'g': ['d', 'j'],       // G4 + D4 (4th) or G4 + C5 (4th)
+		'h': ['f', 'd'],       // A4 + E4 (4th) or A4 + D4 (5th)
+		'j': ['g', 'h'],       // C5 + G4 (4th) or C5 + A4 (3rd)
+		'k': ['h', 'g']        // D5 + A4 (5th) or D5 + G4
+	};
+
+	function pickHarmony(melodyKey) {
+		const options = harmonyMap[melodyKey];
+		if (!options || options.length === 0) return null;
+		return options[Math.floor(Math.random() * options.length)];
+	}
+
+	function startDrone(noteKey) {
+		if (currentDroneKey) stopDrone();
+		const noteData = NOTES.find(n => n.key === noteKey);
+		currentDroneKey = noteKey;
+		playNote(noteData.freq, 'drone-' + noteKey, noteKey);
+		
+		const droneDuration = 8000 + Math.random() * 7000;
+		droneTimeout = setTimeout(() => {
+			stopDrone();
+			// 60% chance to start a new drone
+			if (isComplexPlaying && Math.random() < 0.6) {
+				const droneOptions = ['a', 'g', 'f'];
+				const newDrone = droneOptions[Math.floor(Math.random() * droneOptions.length)];
+				startDrone(newDrone);
+			}
+		}, droneDuration);
+	}
+
+	function stopDrone() {
+		if (droneTimeout) { clearTimeout(droneTimeout); droneTimeout = null; }
+		if (currentDroneKey) {
+			stopNote('drone-' + currentDroneKey, currentDroneKey);
+			currentDroneKey = null;
+		}
+	}
+
+	function generateComplexPhrase() {
+		const melodyRange = ['a', 's', 'd', 'f', 'g', 'h', 'j', 'k'];
+		const length = 4 + Math.floor(Math.random() * 5); // 4-8 notes
+		const phrase = [];
+		
+		// Choose a melodic contour: rising, falling, or arching
+		const contourType = Math.random();
+		let prevIdx = Math.floor(Math.random() * melodyRange.length);
+		
+		for (let i = 0; i < length; i++) {
+			let nextIdx;
+			const roll = Math.random();
+			
+			if (contourType < 0.33) {
+				// Rising tendency
+				if (roll < 0.65) nextIdx = Math.min(melodyRange.length - 1, prevIdx + 1);
+				else if (roll < 0.85) nextIdx = Math.max(0, prevIdx - 1);
+				else nextIdx = Math.floor(Math.random() * melodyRange.length);
+			} else if (contourType < 0.66) {
+				// Falling tendency
+				if (roll < 0.65) nextIdx = Math.max(0, prevIdx - 1);
+				else if (roll < 0.85) nextIdx = Math.min(melodyRange.length - 1, prevIdx + 1);
+				else nextIdx = Math.floor(Math.random() * melodyRange.length);
+			} else {
+				// Arching / random
+				if (roll < 0.7) {
+					const step = Math.random() < 0.5 ? -1 : 1;
+					nextIdx = Math.max(0, Math.min(melodyRange.length - 1, prevIdx + step));
+				} else {
+					nextIdx = Math.floor(Math.random() * melodyRange.length);
+				}
+			}
+			
+			const noteKey = melodyRange[nextIdx];
+			
+			// 45% chance of simultaneous harmony (less likely on very high notes)
+			let harmonyKey = null;
+			if (Math.random() < 0.45 && nextIdx < melodyRange.length - 1) {
+				harmonyKey = pickHarmony(noteKey);
+			}
+			
+			// Longer notes at phrase boundaries for breathing
+			let duration;
+			if (i === 0 || i === length - 1) {
+				duration = 1200 + Math.random() * 1200;
+			} else {
+				duration = 700 + Math.random() * 1100;
+			}
+			
+			phrase.push({ noteKey, harmonyKey, duration });
+			prevIdx = nextIdx;
+		}
+		
+		return phrase;
+	}
+
+	function scheduleComplexPhrase() {
+		if (!isComplexPlaying) return;
+		
+		const phrase = generateComplexPhrase();
+		let delay = 0;
+		
+		phrase.forEach((note) => {
+			// Schedule melody note
+			setTimeout(() => {
+				if (!isComplexPlaying) return;
+				const noteData = NOTES.find(n => n.key === note.noteKey);
+				const id = 'melody-' + (noteCounter++);
+				playNote(noteData.freq, id, note.noteKey);
+				setTimeout(() => {
+					if (activeNotes[id]) stopNote(id, note.noteKey);
+				}, note.duration * 0.9);
+			}, delay);
+			
+			// Schedule harmony note simultaneously
+			if (note.harmonyKey) {
+				setTimeout(() => {
+					if (!isComplexPlaying) return;
+					const harmData = NOTES.find(n => n.key === note.harmonyKey);
+					const id = 'harmony-' + (noteCounter++);
+					playNote(harmData.freq, id, note.harmonyKey);
+					setTimeout(() => {
+						if (activeNotes[id]) stopNote(id, note.harmonyKey);
+					}, note.duration * 0.85);
+				}, delay);
+			}
+			
+			delay += note.duration + 80;
+		});
+		
+		// Rest between phrases
+		const restDuration = 1800 + Math.random() * 2200;
+		complexPlayTimeout = setTimeout(() => {
+			if (isComplexPlaying) scheduleComplexPhrase();
+		}, delay + restDuration);
+	}
+
+	function stopComplexPlay() {
+		isComplexPlaying = false;
+		if (complexPlayTimeout) { clearTimeout(complexPlayTimeout); complexPlayTimeout = null; }
+		stopDrone();
+		// Stop all melody and harmony notes
+		Object.keys(activeNotes).forEach(key => {
+			if (key.startsWith('melody-') || key.startsWith('harmony-')) {
+				stopNote(key);
+			}
+		});
+		complexBtn.classList.remove('active');
+		complexBtn.innerHTML = '🎼 فی البداهه پیچیده';
+	}
+
+	function playComplexMelody() {
+		if (isComplexPlaying) { stopComplexPlay(); return; }
+		if (isRandomPlaying) stopRandomPlay();
+		
+		isComplexPlaying = true;
+		initAudio();
+		complexBtn.classList.add('active');
+		complexBtn.innerHTML = '⏹ توقف';
+		
+		// Start with a drone
+		const droneOptions = ['a', 'g', 'f'];
+		const initialDrone = droneOptions[Math.floor(Math.random() * droneOptions.length)];
+		startDrone(initialDrone);
+		
+		// Begin phrase scheduling after a short delay
+		complexPlayTimeout = setTimeout(() => {
+			if (isComplexPlaying) scheduleComplexPhrase();
+		}, 800);
+	}
+
+	complexBtn.addEventListener('click', () => { initAudio(); playComplexMelody(); });
+
+	// === Global Event Listeners ===
 	window.addEventListener('keydown', (e) => {
 		const key = e.key.toLowerCase();
 		const noteData = NOTES.find(n => n.key === key);
 		if (noteData) {
 			e.preventDefault();
 			if (isRandomPlaying) stopRandomPlay();
+			if (isComplexPlaying) stopComplexPlay();
 			playNote(noteData.freq, key);
 		}
 	});
 
 	window.addEventListener('keyup', (e) => {
 		const key = e.key.toLowerCase();
-		if (NOTES.find(n => n.key === key)) {
-			stopNote(key);
-		}
+		if (NOTES.find(n => n.key === key)) stopNote(key);
 	});
 
 	window.addEventListener('blur', () => {
-		if (!isRandomPlaying) {
+		if (!isRandomPlaying && !isComplexPlaying) {
 			Object.keys(activeNotes).forEach(key => stopNote(key));
 		}
 	});
