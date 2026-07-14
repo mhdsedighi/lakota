@@ -15,11 +15,11 @@ export default {
 		display: flex;
 		flex-direction: column;
 		align-items: center;
-		justify-content: flex-start; /* Prevents top cutoff on mobile scroll */
-		min-height: 100vh; /* Allows content to grow beyond screen height */
+		justify-content: flex-start;
+		min-height: 100vh;
 		margin: 0;
-		overflow-y: auto; /* Enables vertical scrolling */
-		padding: 20px 10px 40px 10px; /* Safe spacing top and bottom */
+		overflow-y: auto;
+		padding: 20px 10px 40px 10px;
 	}
 	.flute-image {
 		width: 80%;
@@ -55,7 +55,7 @@ export default {
 	}
 	.key {
 		width: 55px; 
-		height: 85px; /* Slightly smaller for better mobile fit */
+		height: 85px;
 		background: linear-gradient(180deg, #8b5a2b 0%, #5c3a21 100%);
 		border: 2px solid #3e2312; 
 		border-radius: 12px;
@@ -70,7 +70,7 @@ export default {
 		transition: all 0.1s ease; 
 		user-select: none; 
 		cursor: pointer;
-		touch-action: manipulation; /* Prevents double-tap zoom on mobile */
+		touch-action: manipulation;
 		-webkit-tap-highlight-color: transparent;
 	}
 	.key span { font-size: 0.7rem; opacity: 0.7; margin-top: 4px; }
@@ -266,15 +266,23 @@ export default {
 		whiteNoise.buffer = noiseBuffer;
 		whiteNoise.loop = true;
 
+		// === FIXED FOR MOBILE: Softer breath noise ===
 		const bandpass = audioCtx.createBiquadFilter();
 		bandpass.type = 'bandpass';
-		bandpass.frequency.value = freq * 1.5;
-		bandpass.Q.value = 1.5;
+		// Cap the frequency to prevent harsh hissing on high notes
+		bandpass.frequency.value = Math.min(freq * 1.2, 2500); 
+		bandpass.Q.value = 1.0; // Smoother, less "whistly"
+
+		// Add a lowpass filter to cut harsh high frequencies that cause mobile speaker distortion
+		const lowpass = audioCtx.createBiquadFilter();
+		lowpass.type = 'lowpass';
+		lowpass.frequency.value = 3500; 
 
 		const noiseGain = audioCtx.createGain();
 		noiseGain.gain.setValueAtTime(0.0001, now);
-		noiseGain.gain.linearRampToValueAtTime(0.08, now + attackTime);
-		noiseGain.gain.exponentialRampToValueAtTime(0.03, now + attackTime + decayTime);
+		// Reduced peak gain from 0.08 to 0.04 for mobile friendliness
+		noiseGain.gain.linearRampToValueAtTime(0.04, now + attackTime); 
+		noiseGain.gain.exponentialRampToValueAtTime(0.015, now + attackTime + decayTime);
 
 		const lfo = audioCtx.createOscillator();
 		lfo.type = 'sine';
@@ -285,17 +293,21 @@ export default {
 		lfo.connect(lfoGain);
 		lfoGain.connect(osc.frequency);
 
+		// Connect graph with new lowpass filter
 		osc.connect(oscGain);
 		oscGain.connect(masterGain);
+		
 		whiteNoise.connect(bandpass);
-		bandpass.connect(noiseGain);
+		bandpass.connect(lowpass); // <-- New filter chain
+		lowpass.connect(noiseGain);
 		noiseGain.connect(masterGain);
 
 		osc.start(now);
 		whiteNoise.start(now);
 		lfo.start(now);
 
-		activeNotes[key] = { osc, whiteNoise, lfo, oscGain, noiseGain, lfoGain };
+		// Store lowpass in activeNotes for proper cleanup
+		activeNotes[key] = { osc, whiteNoise, lfo, oscGain, noiseGain, lfoGain, lowpass };
 		
 		const keyEl = document.getElementById('key-' + key);
 		const holeEl = document.getElementById('hole-' + key);
