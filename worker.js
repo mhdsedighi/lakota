@@ -226,6 +226,92 @@ export default {
 	#handGrabModeBtn:hover {
 		background: linear-gradient(180deg, #3a7a60 0%, #2c5e4a 100%);
 	}
+
+	/* === NEW: Parameters Menu Styles === */
+	.params-btn {
+		background: linear-gradient(180deg, #4a3b2c 0%, #2c1e16 100%);
+		border-color: #8b5a2b;
+		font-size: 0.95rem;
+		padding: 12px 20px;
+	}
+	.params-btn:hover {
+		background: linear-gradient(180deg, #6b5540 0%, #4a3b2c 100%);
+	}
+	.params-menu {
+		display: none;
+		flex-direction: column;
+		gap: 16px;
+		margin-top: 15px;
+		width: 90%;
+		max-width: 320px;
+		background: rgba(32, 13, 1, 0.95);
+		border: 2px solid #8b5a2b;
+		border-radius: 12px;
+		padding: 18px;
+		box-shadow: 0 8px 20px rgba(0,0,0,0.6);
+	}
+	.params-menu.open {
+		display: flex;
+	}
+	.param-row {
+		display: flex;
+		flex-direction: column;
+		gap: 6px;
+	}
+	.param-header {
+		display: flex;
+		justify-content: space-between;
+		align-items: center;
+		font-size: 0.9rem;
+		color: #d4a373;
+		font-weight: bold;
+	}
+	.param-input-group {
+		display: flex;
+		gap: 12px;
+		align-items: center;
+	}
+	.param-slider {
+		flex: 1;
+		-webkit-appearance: none;
+		height: 6px;
+		background: #3e2312;
+		border-radius: 3px;
+		outline: none;
+	}
+	.param-slider::-webkit-slider-thumb {
+		-webkit-appearance: none;
+		width: 18px;
+		height: 18px;
+		background: #d4a373;
+		border-radius: 50%;
+		cursor: pointer;
+		border: 2px solid #2c1e16;
+		box-shadow: 0 2px 4px rgba(0,0,0,0.4);
+	}
+	.param-slider::-moz-range-thumb {
+		width: 18px;
+		height: 18px;
+		background: #d4a373;
+		border-radius: 50%;
+		cursor: pointer;
+		border: 2px solid #2c1e16;
+	}
+	.param-number {
+		width: 65px;
+		background: #2c1e16;
+		border: 1px solid #8b5a2b;
+		color: #f4e4d4;
+		border-radius: 6px;
+		padding: 6px;
+		text-align: center;
+		font-family: 'Georgia', serif;
+		font-size: 0.9rem;
+	}
+	.param-number:focus {
+		outline: none;
+		border-color: #d4a373;
+	}
 	
 	/* Back button - centered at the top, clearly above the flute to prevent accidental touch */
 	#backBtn {
@@ -270,6 +356,62 @@ export default {
 <div class="btn-group">
 	<button id="randomPlayBtn" class="random-btn">🎵 فی البداهه</button>
 	<button id="complexPlayBtn" class="random-btn complex">🎼 فی البداهه پیچیده</button>
+	<button id="paramsToggleBtn" class="random-btn params-btn">⚙️ Parameters (پارامترها)</button>
+</div>
+
+<!-- Expandable Parameters Menu -->
+<div id="paramsMenu" class="params-menu">
+	<div class="param-row">
+		<div class="param-header"><span>Phrase Length (Notes)</span></div>
+		<div class="param-input-group">
+			<input type="range" class="param-slider" id="slider-phraseLength" min="4" max="12" step="1" value="6">
+			<input type="number" class="param-number" id="num-phraseLength" min="4" max="12" step="1" value="6">
+		</div>
+	</div>
+	<div class="param-row">
+		<div class="param-header"><span>Harmony Chance (%)</span></div>
+		<div class="param-input-group">
+			<input type="range" class="param-slider" id="slider-harmonyChance" min="0" max="100" step="5" value="45">
+			<input type="number" class="param-number" id="num-harmonyChance" min="0" max="100" step="5" value="45">
+		</div>
+	</div>
+	<div class="param-row">
+		<div class="param-header"><span>Tempo Multiplier (x)</span></div>
+		<div class="param-input-group">
+			<input type="range" class="param-slider" id="slider-tempo" min="0.5" max="2.0" step="0.1" value="1.0">
+			<input type="number" class="param-number" id="num-tempo" min="0.5" max="2.0" step="0.1" value="1.0">
+		</div>
+	</div>
+	<div class="param-row">
+		<div class="param-header"><span>Rest Duration (ms)</span></div>
+		<div class="param-input-group">
+			<input type="range" class="param-slider" id="slider-restDuration" min="1800" max="4000" step="100" value="2900">
+			<input type="number" class="param-number" id="num-restDuration" min="1800" max="4000" step="100" value="2900">
+		</div>
+	</div>
+	<div class="param-row">
+		<div class="param-header"><span>Drone Duration (ms)</span></div>
+		<div class="param-input-group">
+			<input type="range" class="param-slider" id="slider-droneDuration" min="8000" max="15000" step="500" value="11500">
+			<input type="number" class="param-number" id="num-droneDuration" min="8000" max="15000" step="500" value="11500">
+		</div>
+	</div>
+	<div class="param-row">
+		<div class="param-header"><span>Drone Continue Chance (%)</span></div>
+		<div class="param-input-group">
+			<input type="range" class="param-slider" id="slider-droneContinueChance" min="0" max="100" step="5" value="60">
+			<input type="number" class="param-number" id="num-droneContinueChance" min="0" max="100" step="5" value="60">
+		</div>
+	</div>
+	<div class="param-row">
+		<div class="param-header"><span>Contour Bias (-100 Falling to 100 Rising)</span></div>
+		<div class="param-input-group">
+			<input type="range" class="param-slider" id="slider-contourBias" min="-100" max="100" step="10" value="0">
+			<input type="number" class="param-number" id="num-contourBias" min="-100" max="100" step="10" value="0">
+		</div>
+	</div>
+	
+	<button id="resetParamsBtn" class="random-btn" style="margin-top: 10px; font-size: 0.9rem; padding: 10px;">🔄 بازگشت به پیش‌فرض (Reset Defaults)</button>
 </div>
 
 <!-- Hand Grab Mode Toggle Button -->
@@ -640,17 +782,32 @@ export default {
 		return options[Math.floor(Math.random() * options.length)];
 	}
 
+	// === NEW: Dynamic Complex Play Parameters State ===
+	// Defaults are mathematically derived from the original code's random ranges 
+	// to ensure identical baseline behavior.
+	const defaultParams = {
+		phraseLength: 6,             // Original: 4 + Math.floor(Math.random() * 5) -> mean 6
+		harmonyChance: 45,           // Original: Math.random() < 0.45
+		tempo: 1.0,                  // Original: implicit 1.0x
+		restDuration: 2900,          // Original: 1800 + Math.random() * 2200 -> mean 2900
+		droneDuration: 11500,        // Original: 8000 + Math.random() * 7000 -> mean 11500
+		droneContinueChance: 60,     // Original: Math.random() < 0.6
+		contourBias: 0               // Original: equal 33% split between rising, falling, random
+	};
+
+	const complexParams = { ...defaultParams };
+
 	function startDrone(noteKey) {
 		if (currentDroneKey) stopDrone();
 		const noteData = NOTES.find(n => n.key === noteKey);
 		currentDroneKey = noteKey;
 		playNote(noteData.freq, 'drone-' + noteKey, noteKey);
-		
-		const droneDuration = 8000 + Math.random() * 7000;
+
+		const droneDuration = complexParams.droneDuration + (Math.random() * 1000 - 500);
 		droneTimeout = setTimeout(() => {
 			stopDrone();
-			// 60% chance to start a new drone
-			if (isComplexPlaying && Math.random() < 0.6) {
+			// Read dynamically from complexParams without pausing
+			if (isComplexPlaying && Math.random() < (complexParams.droneContinueChance / 100)) {
 				const droneOptions = [';', 'h', 'j'];
 				const newDrone = droneOptions[Math.floor(Math.random() * droneOptions.length)];
 				startDrone(newDrone);
@@ -668,52 +825,44 @@ export default {
 
 	function generateComplexPhrase() {
 		const melodyRange = [';', 'l', 'k', 'j', 'h', 'g', 'f', 'd'];
-		const length = 4 + Math.floor(Math.random() * 5); // 4-8 notes
+		const length = Math.max(2, complexParams.phraseLength + Math.floor(Math.random() * 3) - 1);
 		const phrase = [];
 		
-		// Choose a melodic contour: rising, falling, or arching
-		const contourType = Math.random();
 		let prevIdx = Math.floor(Math.random() * melodyRange.length);
 		
 		for (let i = 0; i < length; i++) {
 			let nextIdx;
 			const roll = Math.random();
 			
-			if (contourType < 0.33) {
-				// Rising tendency
-				if (roll < 0.65) nextIdx = Math.min(melodyRange.length - 1, prevIdx + 1);
-				else if (roll < 0.85) nextIdx = Math.max(0, prevIdx - 1);
-				else nextIdx = Math.floor(Math.random() * melodyRange.length);
-			} else if (contourType < 0.66) {
-				// Falling tendency
-				if (roll < 0.65) nextIdx = Math.max(0, prevIdx - 1);
-				else if (roll < 0.85) nextIdx = Math.min(melodyRange.length - 1, prevIdx + 1);
-				else nextIdx = Math.floor(Math.random() * melodyRange.length);
+			// Read dynamically from complexParams: smoothly interpolate probabilities based on bias
+			const bias = complexParams.contourBias / 100; // -1.0 (falling) to 1.0 (rising)
+			const stepUpProb = 0.65 + (bias * 0.20); // ranges from 0.45 to 0.85
+			const stepDownProb = stepUpProb + 0.20;  // maintain a 20% band for the secondary step
+			
+			if (roll < stepUpProb) {
+				nextIdx = Math.min(melodyRange.length - 1, prevIdx + 1);
+			} else if (roll < stepDownProb) {
+				nextIdx = Math.max(0, prevIdx - 1);
 			} else {
-				// Arching / random
-				if (roll < 0.7) {
-					const step = Math.random() < 0.5 ? -1 : 1;
-					nextIdx = Math.max(0, Math.min(melodyRange.length - 1, prevIdx + step));
-				} else {
-					nextIdx = Math.floor(Math.random() * melodyRange.length);
-				}
+				nextIdx = Math.floor(Math.random() * melodyRange.length);
 			}
 			
 			const noteKey = melodyRange[nextIdx];
 			
-			// 45% chance of simultaneous harmony (less likely on very high notes)
+			// Read dynamically from complexParams
 			let harmonyKey = null;
-			if (Math.random() < 0.45 && nextIdx < melodyRange.length - 1) {
+			if (Math.random() < (complexParams.harmonyChance / 100) && nextIdx < melodyRange.length - 1) {
 				harmonyKey = pickHarmony(noteKey);
 			}
 			
-			// Longer notes at phrase boundaries for breathing
-			let duration;
+			let baseDuration;
 			if (i === 0 || i === length - 1) {
-				duration = 1200 + Math.random() * 1200;
+				baseDuration = 1200 + Math.random() * 1200;
 			} else {
-				duration = 700 + Math.random() * 1100;
+				baseDuration = 700 + Math.random() * 1100;
 			}
+			
+			const duration = baseDuration / complexParams.tempo;
 			
 			phrase.push({ noteKey, harmonyKey, duration });
 			prevIdx = nextIdx;
@@ -755,8 +904,8 @@ export default {
 			delay += note.duration + 80;
 		});
 		
-		// Rest between phrases
-		const restDuration = 1800 + Math.random() * 2200;
+		// Rest between phrases: Read dynamically from complexParams with slight organic variance
+		const restDuration = complexParams.restDuration + (Math.random() * 400 - 200);
 		complexPlayTimeout = setTimeout(() => {
 			if (isComplexPlaying) scheduleComplexPhrase();
 		}, delay + restDuration);
@@ -798,6 +947,55 @@ export default {
 	}
 
 	complexBtn.addEventListener('click', () => { initAudio(); playComplexMelody(); });
+
+	// === NEW: Parameters Menu Logic ===
+	const paramsToggleBtn = document.getElementById('paramsToggleBtn');
+	const paramsMenu = document.getElementById('paramsMenu');
+	
+	paramsToggleBtn.addEventListener('click', () => {
+		paramsMenu.classList.toggle('open');
+	});
+
+	function bindParamControl(paramKey, sliderId, numId, min, max, step) {
+		const slider = document.getElementById(sliderId);
+		const numInput = document.getElementById(numId);
+		
+		const updateValue = (val) => {
+			let parsed = parseFloat(val);
+			if (isNaN(parsed)) parsed = complexParams[paramKey];
+			// Clamp value
+			parsed = Math.max(min, Math.min(max, parsed));
+			
+			complexParams[paramKey] = parsed;
+			slider.value = parsed;
+			numInput.value = parsed;
+		};
+		
+		slider.addEventListener('input', (e) => updateValue(e.target.value));
+		numInput.addEventListener('change', (e) => updateValue(e.target.value));
+	}
+
+	// Bind all parameter controls
+	bindParamControl('phraseLength', 'slider-phraseLength', 'num-phraseLength', 4, 12, 1);
+	bindParamControl('harmonyChance', 'slider-harmonyChance', 'num-harmonyChance', 0, 100, 5);
+	bindParamControl('tempo', 'slider-tempo', 'num-tempo', 0.5, 2.0, 0.1);
+	bindParamControl('restDuration', 'slider-restDuration', 'num-restDuration', 1800, 4000, 100);
+	bindParamControl('droneDuration', 'slider-droneDuration', 'num-droneDuration', 8000, 15000, 500);
+	bindParamControl('droneContinueChance', 'slider-droneContinueChance', 'num-droneContinueChance', 0, 100, 5);
+	bindParamControl('contourBias', 'slider-contourBias', 'num-contourBias', -100, 100, 10);
+
+	// Reset to Defaults Functionality
+	function resetToDefaults() {
+		for (const key in defaultParams) {
+			complexParams[key] = defaultParams[key];
+			const slider = document.getElementById('slider-' + key);
+			const numInput = document.getElementById('num-' + key);
+			if (slider) slider.value = defaultParams[key];
+			if (numInput) numInput.value = defaultParams[key];
+		}
+	}
+	
+	document.getElementById('resetParamsBtn').addEventListener('click', resetToDefaults);
 
 	// === Hand Grab Mode Toggle Logic ===
 	const handGrabModeBtn = document.getElementById('handGrabModeBtn');
