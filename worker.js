@@ -1003,10 +1003,10 @@ var worker_default = {
 		try {
 			localStorage.setItem(CACHE_KEY, JSON.stringify(complexParams));
 			console.log('[Cache] Saved latest parameters to browser cache:', { ...complexParams });
-			showCacheStatus('\u2713 Saved');
+			showCacheStatus('✓ Saved');
 		} catch (e) {
 			console.warn('[Cache] Failed to save parameters to browser cache:', e);
-			showCacheStatus('\u2717 Save failed');
+			showCacheStatus('✗ Save failed');
 		}
 	}
 
