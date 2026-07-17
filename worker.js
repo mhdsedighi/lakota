@@ -174,9 +174,12 @@ var worker_default = {
 		gap: 12px;
 		margin-top: 25px;
 		width: 90%;
-		max-width: 320px;
+		max-width: 600px;
+		align-items: center;
 	}
 	.random-btn {
+		width: 100%;
+		max-width: 320px
 		padding: 14px 28px;
 		font-size: 1.1rem;
 		font-family: 'Georgia', serif;
@@ -236,6 +239,7 @@ var worker_default = {
 		gap: 10px;
 		align-items: center;
 		width: 100%;
+		max-width: 320px;
 	}
 	/* Small circular params icon button - positioned to the left of the complex button */
 	.small-params-btn {
@@ -275,50 +279,44 @@ var worker_default = {
 	.params-menu {
 		display: none;
 		flex-direction: column;
-		gap: 16px;
+		gap: 12px;
 		margin-top: 12px;
 		width: 100%;
 		background: rgba(32, 13, 1, 0.95);
 		border: 2px solid #8b5a2b;
 		border-radius: 12px;
-		padding: 18px;
+		padding: 16px;
 		box-shadow: 0 8px 20px rgba(0,0,0,0.6);
-		max-height: 70vh;
-		overflow-y: auto;
 	}
 	.params-menu.open {
 		display: flex;
 	}
 	
-	/* NEW: Responsive Grid for Parameters */
+	/* Responsive Grid for Parameters */
 	.params-grid {
 		display: grid;
-		grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
-		gap: 16px;
+		grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+		gap: 8px 24px;
 		width: 100%;
 	}
 	
+	/* Compact parameter rows (boxes/spacing omitted to save vertical space) */
 	.param-row {
 		display: flex;
 		flex-direction: column;
-		gap: 6px;
-		/* Subtle background to distinguish grid items */
-		background: rgba(62, 35, 18, 0.25);
-		padding: 12px;
-		border-radius: 8px;
-		border: 1px solid rgba(139, 90, 43, 0.3);
+		gap: 4px;
 	}
 	.param-header {
 		display: flex;
 		justify-content: space-between;
 		align-items: center;
-		font-size: 0.9rem;
+		font-size: 0.85rem;
 		color: #d4a373;
 		font-weight: bold;
 	}
 	.param-input-group {
 		display: flex;
-		gap: 12px;
+		gap: 8px;
 		align-items: center;
 	}
 	.param-slider {
@@ -348,15 +346,15 @@ var worker_default = {
 		border: 2px solid #2c1e16;
 	}
 	.param-number {
-		width: 65px;
+		width: 55px;
 		background: #2c1e16;
 		border: 1px solid #8b5a2b;
 		color: #f4e4d4;
 		border-radius: 6px;
-		padding: 6px;
+		padding: 4px;
 		text-align: center;
 		font-family: 'Georgia', serif;
-		font-size: 0.9rem;
+		font-size: 0.85rem;
 	}
 	.param-number:focus {
 		outline: none;
@@ -482,7 +480,7 @@ var worker_default = {
 				</div>
 			</div>
 			
-			<!-- Rhythm & Dynamics -->
+			<!-- Rhythm & Dynamics (Grouped together) -->
 			<div class="param-row">
 				<div class="param-header"><span>Rhythmic Variation (%)</span></div>
 				<div class="param-input-group">
@@ -549,10 +547,10 @@ var worker_default = {
 		<div style="text-align: center; color: #d4a373; font-weight: bold; margin-top: 12px; margin-bottom: 8px; font-size: 0.95rem; border-top: 1px solid #3e2312; padding-top: 12px;">
 			Presets - پیشفرض‌ها
 		</div>
-		<div class="preset-group" style="display: flex; gap: 8px;">
-			<button id="preset1Btn" class="random-btn" style="flex: 1; font-size: 0.75rem; padding: 10px;">\u{1F3B5} Traditional Flow</button>
-			<button id="preset2Btn" class="random-btn" style="flex: 1; font-size: 0.75rem; padding: 10px;">\u{1F3B6} Expressive Realism</button>
-			<button id="preset3Btn" class="random-btn" style="flex: 1; font-size: 0.75rem; padding: 10px;">\u{1F3BC} Advanced Improv</button>
+		<div class="preset-group" style="display: flex; gap: 8px; width: 100%; max-width: 320px;">
+			<button id="preset1Btn" class="random-btn" style="flex: 1; font-size: 0.75rem; padding: 10px; max-width: none;">\u{1F3B5} Traditional Flow</button>
+			<button id="preset2Btn" class="random-btn" style="flex: 1; font-size: 0.75rem; padding: 10px; max-width: none;">\u{1F3B6} Expressive Realism</button>
+			<button id="preset3Btn" class="random-btn" style="flex: 1; font-size: 0.75rem; padding: 10px; max-width: none;">\u{1F3BC} Advanced Improv</button>
 		</div>
 		<div id="cacheStatus" class="cache-status">\u2713 Saved</div>
 	</div>
