@@ -283,16 +283,30 @@ var worker_default = {
 		border-radius: 12px;
 		padding: 18px;
 		box-shadow: 0 8px 20px rgba(0,0,0,0.6);
-		max-height: 60vh;
+		max-height: 70vh;
 		overflow-y: auto;
 	}
 	.params-menu.open {
 		display: flex;
 	}
+	
+	/* NEW: Responsive Grid for Parameters */
+	.params-grid {
+		display: grid;
+		grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+		gap: 16px;
+		width: 100%;
+	}
+	
 	.param-row {
 		display: flex;
 		flex-direction: column;
 		gap: 6px;
+		/* Subtle background to distinguish grid items */
+		background: rgba(62, 35, 18, 0.25);
+		padding: 12px;
+		border-radius: 8px;
+		border: 1px solid rgba(139, 90, 43, 0.3);
 	}
 	.param-header {
 		display: flex;
@@ -354,7 +368,7 @@ var worker_default = {
 		font-size: 0.75rem;
 		color: #8b5a2b;
 		text-align: center;
-		margin-top: 4px;
+		margin-top: 8px;
 		opacity: 0;
 		transition: opacity 0.3s ease;
 		font-style: italic;
@@ -394,7 +408,7 @@ var worker_default = {
 
 <img src="https://images.squarespace-cdn.com/content/v1/56fae4be1d07c0c393d8faa5/1556034153700-O4M9FPFDCMRX1DNQ2S6W/Flute.jpg" alt="Lakota Flute" class="flute-image">
 
-<h1>🪶 Lakota Flute 🪶</h1>
+<h1>\u{1FAB6} Lakota Flute \u{1FAB6}</h1>
 <p class="instructions">Click keys or flute holes, use your keyboard (A-L, ;), or play a soothing random melody.</p>
 
 <div class="keyboard" id="keyboard"></div>
@@ -404,123 +418,138 @@ var worker_default = {
 <div class="vertical-flute" id="verticalFlute"></div>
 
 <div class="btn-group">
-	<button id="randomPlayBtn" class="random-btn">🎵  بداهه تک دکمه  </button>
+	<button id="randomPlayBtn" class="random-btn">\u{1F3B5}  \u0628\u062F\u0627\u0647\u0647 \u062A\u06A9 \u062F\u06A9\u0645\u0647  </button>
 	
 	<!-- Complex button + small params button in a single row -->
 	<div class="complex-row">
-		<button id="paramsToggleBtn" class="random-btn small-params-btn" title="Parameters - پارامترها">⚙️</button>
-		<button id="complexPlayBtn" class="random-btn complex">🎼 بداهه پیچیده </button>
+		<button id="paramsToggleBtn" class="random-btn small-params-btn" title="Parameters - \u067E\u0627\u0631\u0627\u0645\u062A\u0631\u0647\u0627">\u2699\uFE0F</button>
+		<button id="complexPlayBtn" class="random-btn complex">\u{1F3BC} \u0628\u062F\u0627\u0647\u0647 \u067E\u06CC\u0686\u06CC\u062F\u0647 </button>
 	</div>
 
-	<!-- Expandable Parameters Menu (Moved here to be directly under complex-play button) -->
+	<!-- Expandable Parameters Menu -->
 	<div id="paramsMenu" class="params-menu">
-		<div class="param-row">
-			<div class="param-header"><span>Phrase Length (Notes)</span></div>
-			<div class="param-input-group">
-				<input type="range" class="param-slider" id="slider-phraseLength" min="4" max="16" step="1" value="6">
-				<input type="number" class="param-number" id="num-phraseLength" min="4" max="16" step="1" value="6">
+		<div class="params-grid">
+			<!-- Core Timing -->
+			<div class="param-row">
+				<div class="param-header"><span>Phrase Length (Notes)</span></div>
+				<div class="param-input-group">
+					<input type="range" class="param-slider" id="slider-phraseLength" min="4" max="16" step="1" value="6">
+					<input type="number" class="param-number" id="num-phraseLength" min="4" max="16" step="1" value="6">
+				</div>
 			</div>
-		</div>
-		<div class="param-row">
-			<div class="param-header"><span>Harmony Chance (%)</span></div>
-			<div class="param-input-group">
-				<input type="range" class="param-slider" id="slider-harmonyChance" min="0" max="100" step="5" value="45">
-				<input type="number" class="param-number" id="num-harmonyChance" min="0" max="100" step="5" value="45">
+			<div class="param-row">
+				<div class="param-header"><span>Tempo Multiplier (x)</span></div>
+				<div class="param-input-group">
+					<input type="range" class="param-slider" id="slider-tempo" min="0.3" max="3.0" step="0.1" value="1.0">
+					<input type="number" class="param-number" id="num-tempo" min="0.3" max="3.0" step="0.1" value="1.0">
+				</div>
 			</div>
-		</div>
-		<div class="param-row">
-			<div class="param-header"><span>Tempo Multiplier (x)</span></div>
-			<div class="param-input-group">
-				<input type="range" class="param-slider" id="slider-tempo" min="0.3" max="3.0" step="0.1" value="1.0">
-				<input type="number" class="param-number" id="num-tempo" min="0.3" max="3.0" step="0.1" value="1.0">
+			<div class="param-row">
+				<div class="param-header"><span>Rest Duration (ms)</span></div>
+				<div class="param-input-group">
+					<input type="range" class="param-slider" id="slider-restDuration" min="500" max="6000" step="100" value="2900">
+					<input type="number" class="param-number" id="num-restDuration" min="500" max="6000" step="100" value="2900">
+				</div>
 			</div>
-		</div>
-		<div class="param-row">
-			<div class="param-header"><span>Rest Duration (ms)</span></div>
-			<div class="param-input-group">
-				<input type="range" class="param-slider" id="slider-restDuration" min="500" max="6000" step="100" value="2900">
-				<input type="number" class="param-number" id="num-restDuration" min="500" max="6000" step="100" value="2900">
+			
+			<!-- Melody & Harmony -->
+			<div class="param-row">
+				<div class="param-header"><span>Harmony Chance (%)</span></div>
+				<div class="param-input-group">
+					<input type="range" class="param-slider" id="slider-harmonyChance" min="0" max="100" step="5" value="45">
+					<input type="number" class="param-number" id="num-harmonyChance" min="0" max="100" step="5" value="45">
+				</div>
 			</div>
-		</div>
-		<div class="param-row">
-			<div class="param-header"><span>Drone Duration (ms)</span></div>
-			<div class="param-input-group">
-				<input type="range" class="param-slider" id="slider-droneDuration" min="5000" max="20000" step="500" value="11500">
-				<input type="number" class="param-number" id="num-droneDuration" min="5000" max="20000" step="500" value="11500">
+			<div class="param-row">
+				<div class="param-header"><span>Contour Bias (-100 Falling to 100 Rising)</span></div>
+				<div class="param-input-group">
+					<input type="range" class="param-slider" id="slider-contourBias" min="-100" max="100" step="10" value="0">
+					<input type="number" class="param-number" id="num-contourBias" min="-100" max="100" step="10" value="0">
+				</div>
 			</div>
-		</div>
-		<div class="param-row">
-			<div class="param-header"><span>Drone Continue Chance (%)</span></div>
-			<div class="param-input-group">
-				<input type="range" class="param-slider" id="slider-droneContinueChance" min="0" max="100" step="5" value="60">
-				<input type="number" class="param-number" id="num-droneContinueChance" min="0" max="100" step="5" value="60">
+			<div class="param-row">
+				<div class="param-header"><span>Motif Repeat Chance (%)</span></div>
+				<div class="param-input-group">
+					<input type="range" class="param-slider" id="slider-motifRepeatChance" min="0" max="100" step="5" value="0">
+					<input type="number" class="param-number" id="num-motifRepeatChance" min="0" max="100" step="5" value="0">
+				</div>
 			</div>
-		</div>
-		<div class="param-row">
-			<div class="param-header"><span>Contour Bias (-100 Falling to 100 Rising)</span></div>
-			<div class="param-input-group">
-				<input type="range" class="param-slider" id="slider-contourBias" min="-100" max="100" step="10" value="0">
-				<input type="number" class="param-number" id="num-contourBias" min="-100" max="100" step="10" value="0">
+			<div class="param-row">
+				<div class="param-header"><span>Grace Note Chance (%)</span></div>
+				<div class="param-input-group">
+					<input type="range" class="param-slider" id="slider-graceNoteChance" min="0" max="100" step="5" value="0">
+					<input type="number" class="param-number" id="num-graceNoteChance" min="0" max="100" step="5" value="0">
+				</div>
 			</div>
-		</div>
-		<div class="param-row">
-			<div class="param-header"><span>Vibrato Depth (Hz)</span></div>
-			<div class="param-input-group">
-				<input type="range" class="param-slider" id="slider-vibratoDepth" min="0" max="8" step="0.5" value="2.5">
-				<input type="number" class="param-number" id="num-vibratoDepth" min="0" max="8" step="0.5" value="2.5">
+			
+			<!-- Rhythm & Dynamics -->
+			<div class="param-row">
+				<div class="param-header"><span>Rhythmic Variation (%)</span></div>
+				<div class="param-input-group">
+					<input type="range" class="param-slider" id="slider-rhythmicVariation" min="0" max="100" step="5" value="0">
+					<input type="number" class="param-number" id="num-rhythmicVariation" min="0" max="100" step="5" value="0">
+				</div>
 			</div>
-		</div>
-		<div class="param-row">
-			<div class="param-header"><span>Breath Noise Level</span></div>
-			<div class="param-input-group">
-				<input type="range" class="param-slider" id="slider-breathNoiseLevel" min="0" max="0.08" step="0.005" value="0.04">
-				<input type="number" class="param-number" id="num-breathNoiseLevel" min="0" max="0.08" step="0.005" value="0.04">
+			<div class="param-row">
+				<div class="param-header"><span>Dynamic Range (%)</span></div>
+				<div class="param-input-group">
+					<input type="range" class="param-slider" id="slider-dynamicRange" min="0" max="100" step="5" value="0">
+					<input type="number" class="param-number" id="num-dynamicRange" min="0" max="100" step="5" value="0">
+				</div>
 			</div>
-		</div>
-		<div class="param-row">
-			<div class="param-header"><span>Slide Duration (s)</span></div>
-			<div class="param-input-group">
-				<input type="range" class="param-slider" id="slider-slideDuration" min="0" max="0.25" step="0.01" value="0.1">
-				<input type="number" class="param-number" id="num-slideDuration" min="0" max="0.25" step="0.01" value="0.1">
+			<div class="param-row">
+				<div class="param-header"><span>Dynamic Variation (%)</span></div>
+				<div class="param-input-group">
+					<input type="range" class="param-slider" id="slider-dynamicVariation" min="0" max="60" step="5" value="0">
+					<input type="number" class="param-number" id="num-dynamicVariation" min="0" max="60" step="5" value="0">
+				</div>
 			</div>
-		</div>
-		<div class="param-row">
-			<div class="param-header"><span>Dynamic Variation (%)</span></div>
-			<div class="param-input-group">
-				<input type="range" class="param-slider" id="slider-dynamicVariation" min="0" max="60" step="5" value="0">
-				<input type="number" class="param-number" id="num-dynamicVariation" min="0" max="60" step="5" value="0">
+			
+			<!-- Drone -->
+			<div class="param-row">
+				<div class="param-header"><span>Drone Duration (ms)</span></div>
+				<div class="param-input-group">
+					<input type="range" class="param-slider" id="slider-droneDuration" min="5000" max="20000" step="500" value="11500">
+					<input type="number" class="param-number" id="num-droneDuration" min="5000" max="20000" step="500" value="11500">
+				</div>
 			</div>
-		</div>
-		<div class="param-row">
-			<div class="param-header"><span>Motif Repeat Chance (%)</span></div>
-			<div class="param-input-group">
-				<input type="range" class="param-slider" id="slider-motifRepeatChance" min="0" max="100" step="5" value="0">
-				<input type="number" class="param-number" id="num-motifRepeatChance" min="0" max="100" step="5" value="0">
+			<div class="param-row">
+				<div class="param-header"><span>Drone Continue Chance (%)</span></div>
+				<div class="param-input-group">
+					<input type="range" class="param-slider" id="slider-droneContinueChance" min="0" max="100" step="5" value="60">
+					<input type="number" class="param-number" id="num-droneContinueChance" min="0" max="100" step="5" value="60">
+				</div>
 			</div>
-		</div>
-		<div class="param-row">
-			<div class="param-header"><span>Grace Note Chance (%)</span></div>
-			<div class="param-input-group">
-				<input type="range" class="param-slider" id="slider-graceNoteChance" min="0" max="100" step="5" value="0">
-				<input type="number" class="param-number" id="num-graceNoteChance" min="0" max="100" step="5" value="0">
+			
+			<!-- Tone & Expression -->
+			<div class="param-row">
+				<div class="param-header"><span>Vibrato Depth (Hz)</span></div>
+				<div class="param-input-group">
+					<input type="range" class="param-slider" id="slider-vibratoDepth" min="0" max="8" step="0.5" value="2.5">
+					<input type="number" class="param-number" id="num-vibratoDepth" min="0" max="8" step="0.5" value="2.5">
+				</div>
 			</div>
-		</div>
-		<div class="param-row">
-			<div class="param-header"><span>Rhythmic Variation (%)</span></div>
-			<div class="param-input-group">
-				<input type="range" class="param-slider" id="slider-rhythmicVariation" min="0" max="100" step="5" value="0">
-				<input type="number" class="param-number" id="num-rhythmicVariation" min="0" max="100" step="5" value="0">
+			<div class="param-row">
+				<div class="param-header"><span>Breath Noise Level</span></div>
+				<div class="param-input-group">
+					<input type="range" class="param-slider" id="slider-breathNoiseLevel" min="0" max="0.08" step="0.005" value="0.04">
+					<input type="number" class="param-number" id="num-breathNoiseLevel" min="0" max="0.08" step="0.005" value="0.04">
+				</div>
 			</div>
-		</div>
-		<div class="param-row">
-			<div class="param-header"><span>Dynamic Range (%)</span></div>
-			<div class="param-input-group">
-				<input type="range" class="param-slider" id="slider-dynamicRange" min="0" max="100" step="5" value="0">
-				<input type="number" class="param-number" id="num-dynamicRange" min="0" max="100" step="5" value="0">
+			<div class="param-row">
+				<div class="param-header"><span>Slide Duration (s)</span></div>
+				<div class="param-input-group">
+					<input type="range" class="param-slider" id="slider-slideDuration" min="0" max="0.25" step="0.01" value="0.1">
+					<input type="number" class="param-number" id="num-slideDuration" min="0" max="0.25" step="0.01" value="0.1">
+				</div>
 			</div>
 		</div>
 		
-		<div class="preset-group" style="display: flex; gap: 8px; margin-top: 10px;">
+		<!-- Presets Section -->
+		<div style="text-align: center; color: #d4a373; font-weight: bold; margin-top: 12px; margin-bottom: 8px; font-size: 0.95rem; border-top: 1px solid #3e2312; padding-top: 12px;">
+			Presets - پیشفرض‌ها
+		</div>
+		<div class="preset-group" style="display: flex; gap: 8px;">
 			<button id="preset1Btn" class="random-btn" style="flex: 1; font-size: 0.75rem; padding: 10px;">\u{1F3B5} Traditional Flow</button>
 			<button id="preset2Btn" class="random-btn" style="flex: 1; font-size: 0.75rem; padding: 10px;">\u{1F3B6} Expressive Realism</button>
 			<button id="preset3Btn" class="random-btn" style="flex: 1; font-size: 0.75rem; padding: 10px;">\u{1F3BC} Advanced Improv</button>
@@ -856,7 +885,7 @@ var worker_default = {
 		Object.keys(activeNotes).forEach(key => stopNote(key));
 		clearAllVisuals(); // Ensure visuals are clean
 		randomBtn.classList.remove('active');
-		randomBtn.innerHTML = '🎵  بداهه تک دکمه  ';
+		randomBtn.innerHTML = '\u{1F3B5}  \u0628\u062F\u0627\u0647\u0647 \u062A\u06A9 \u062F\u06A9\u0645\u0647  ';
 	}
 
 	function playSoothingMelody() {
@@ -866,7 +895,7 @@ var worker_default = {
 		isRandomPlaying = true;
 		initAudio();
 		randomBtn.classList.add('active');
-		randomBtn.innerHTML = '⏹ توقف';
+		randomBtn.innerHTML = '\u23F9 \u062A\u0648\u0642\u0641';
 
 		const soothingNotes = [
 			{ key: ';', weight: 4 }, { key: 'l', weight: 2 },
@@ -1358,20 +1387,20 @@ var worker_default = {
 
 	// Bind all parameter controls (unified from all iterations)
 	bindParamControl('phraseLength', 'slider-phraseLength', 'num-phraseLength', 4, 16, 1);
-	bindParamControl('harmonyChance', 'slider-harmonyChance', 'num-harmonyChance', 0, 100, 5);
 	bindParamControl('tempo', 'slider-tempo', 'num-tempo', 0.3, 3.0, 0.1);
 	bindParamControl('restDuration', 'slider-restDuration', 'num-restDuration', 500, 6000, 100);
-	bindParamControl('droneDuration', 'slider-droneDuration', 'num-droneDuration', 5000, 20000, 500);
-	bindParamControl('droneContinueChance', 'slider-droneContinueChance', 'num-droneContinueChance', 0, 100, 5);
+	bindParamControl('harmonyChance', 'slider-harmonyChance', 'num-harmonyChance', 0, 100, 5);
 	bindParamControl('contourBias', 'slider-contourBias', 'num-contourBias', -100, 100, 10);
-	bindParamControl('vibratoDepth', 'slider-vibratoDepth', 'num-vibratoDepth', 0, 8, 0.5);
-	bindParamControl('breathNoiseLevel', 'slider-breathNoiseLevel', 'num-breathNoiseLevel', 0, 0.08, 0.005);
-	bindParamControl('slideDuration', 'slider-slideDuration', 'num-slideDuration', 0, 0.25, 0.01);
-	bindParamControl('dynamicVariation', 'slider-dynamicVariation', 'num-dynamicVariation', 0, 60, 5);
 	bindParamControl('motifRepeatChance', 'slider-motifRepeatChance', 'num-motifRepeatChance', 0, 100, 5);
 	bindParamControl('graceNoteChance', 'slider-graceNoteChance', 'num-graceNoteChance', 0, 100, 5);
 	bindParamControl('rhythmicVariation', 'slider-rhythmicVariation', 'num-rhythmicVariation', 0, 100, 5);
 	bindParamControl('dynamicRange', 'slider-dynamicRange', 'num-dynamicRange', 0, 100, 5);
+	bindParamControl('dynamicVariation', 'slider-dynamicVariation', 'num-dynamicVariation', 0, 60, 5);
+	bindParamControl('droneDuration', 'slider-droneDuration', 'num-droneDuration', 5000, 20000, 500);
+	bindParamControl('droneContinueChance', 'slider-droneContinueChance', 'num-droneContinueChance', 0, 100, 5);
+	bindParamControl('vibratoDepth', 'slider-vibratoDepth', 'num-vibratoDepth', 0, 8, 0.5);
+	bindParamControl('breathNoiseLevel', 'slider-breathNoiseLevel', 'num-breathNoiseLevel', 0, 0.08, 0.005);
+	bindParamControl('slideDuration', 'slider-slideDuration', 'num-slideDuration', 0, 0.25, 0.01);
 
 	// Preset Button Event Listeners
 	document.getElementById('preset1Btn').addEventListener('click', () => applyPreset('traditional'));
