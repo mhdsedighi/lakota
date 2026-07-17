@@ -1,6 +1,7 @@
-export default {
-	async fetch(request, env, ctx) {
-		const html = `
+// worker.js
+var worker_default = {
+  async fetch(request, env, ctx) {
+    const html = `
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -282,6 +283,8 @@ export default {
 		border-radius: 12px;
 		padding: 18px;
 		box-shadow: 0 8px 20px rgba(0,0,0,0.6);
+		max-height: 60vh;
+		overflow-y: auto;
 	}
 	.params-menu.open {
 		display: flex;
@@ -414,8 +417,8 @@ export default {
 		<div class="param-row">
 			<div class="param-header"><span>Phrase Length (Notes)</span></div>
 			<div class="param-input-group">
-				<input type="range" class="param-slider" id="slider-phraseLength" min="4" max="12" step="1" value="6">
-				<input type="number" class="param-number" id="num-phraseLength" min="4" max="12" step="1" value="6">
+				<input type="range" class="param-slider" id="slider-phraseLength" min="4" max="16" step="1" value="6">
+				<input type="number" class="param-number" id="num-phraseLength" min="4" max="16" step="1" value="6">
 			</div>
 		</div>
 		<div class="param-row">
@@ -428,22 +431,22 @@ export default {
 		<div class="param-row">
 			<div class="param-header"><span>Tempo Multiplier (x)</span></div>
 			<div class="param-input-group">
-				<input type="range" class="param-slider" id="slider-tempo" min="0.5" max="2.0" step="0.1" value="1.0">
-				<input type="number" class="param-number" id="num-tempo" min="0.5" max="2.0" step="0.1" value="1.0">
+				<input type="range" class="param-slider" id="slider-tempo" min="0.3" max="3.0" step="0.1" value="1.0">
+				<input type="number" class="param-number" id="num-tempo" min="0.3" max="3.0" step="0.1" value="1.0">
 			</div>
 		</div>
 		<div class="param-row">
 			<div class="param-header"><span>Rest Duration (ms)</span></div>
 			<div class="param-input-group">
-				<input type="range" class="param-slider" id="slider-restDuration" min="1800" max="4000" step="100" value="2900">
-				<input type="number" class="param-number" id="num-restDuration" min="1800" max="4000" step="100" value="2900">
+				<input type="range" class="param-slider" id="slider-restDuration" min="500" max="6000" step="100" value="2900">
+				<input type="number" class="param-number" id="num-restDuration" min="500" max="6000" step="100" value="2900">
 			</div>
 		</div>
 		<div class="param-row">
 			<div class="param-header"><span>Drone Duration (ms)</span></div>
 			<div class="param-input-group">
-				<input type="range" class="param-slider" id="slider-droneDuration" min="8000" max="15000" step="500" value="11500">
-				<input type="number" class="param-number" id="num-droneDuration" min="8000" max="15000" step="500" value="11500">
+				<input type="range" class="param-slider" id="slider-droneDuration" min="5000" max="20000" step="500" value="11500">
+				<input type="number" class="param-number" id="num-droneDuration" min="5000" max="20000" step="500" value="11500">
 			</div>
 		</div>
 		<div class="param-row">
@@ -460,20 +463,80 @@ export default {
 				<input type="number" class="param-number" id="num-contourBias" min="-100" max="100" step="10" value="0">
 			</div>
 		</div>
+		<div class="param-row">
+			<div class="param-header"><span>Vibrato Depth (Hz)</span></div>
+			<div class="param-input-group">
+				<input type="range" class="param-slider" id="slider-vibratoDepth" min="0" max="8" step="0.5" value="2.5">
+				<input type="number" class="param-number" id="num-vibratoDepth" min="0" max="8" step="0.5" value="2.5">
+			</div>
+		</div>
+		<div class="param-row">
+			<div class="param-header"><span>Breath Noise Level</span></div>
+			<div class="param-input-group">
+				<input type="range" class="param-slider" id="slider-breathNoiseLevel" min="0" max="0.08" step="0.005" value="0.04">
+				<input type="number" class="param-number" id="num-breathNoiseLevel" min="0" max="0.08" step="0.005" value="0.04">
+			</div>
+		</div>
+		<div class="param-row">
+			<div class="param-header"><span>Slide Duration (s)</span></div>
+			<div class="param-input-group">
+				<input type="range" class="param-slider" id="slider-slideDuration" min="0" max="0.25" step="0.01" value="0.1">
+				<input type="number" class="param-number" id="num-slideDuration" min="0" max="0.25" step="0.01" value="0.1">
+			</div>
+		</div>
+		<div class="param-row">
+			<div class="param-header"><span>Dynamic Variation (%)</span></div>
+			<div class="param-input-group">
+				<input type="range" class="param-slider" id="slider-dynamicVariation" min="0" max="60" step="5" value="0">
+				<input type="number" class="param-number" id="num-dynamicVariation" min="0" max="60" step="5" value="0">
+			</div>
+		</div>
+		<div class="param-row">
+			<div class="param-header"><span>Motif Repeat Chance (%)</span></div>
+			<div class="param-input-group">
+				<input type="range" class="param-slider" id="slider-motifRepeatChance" min="0" max="100" step="5" value="0">
+				<input type="number" class="param-number" id="num-motifRepeatChance" min="0" max="100" step="5" value="0">
+			</div>
+		</div>
+		<div class="param-row">
+			<div class="param-header"><span>Grace Note Chance (%)</span></div>
+			<div class="param-input-group">
+				<input type="range" class="param-slider" id="slider-graceNoteChance" min="0" max="100" step="5" value="0">
+				<input type="number" class="param-number" id="num-graceNoteChance" min="0" max="100" step="5" value="0">
+			</div>
+		</div>
+		<div class="param-row">
+			<div class="param-header"><span>Rhythmic Variation (%)</span></div>
+			<div class="param-input-group">
+				<input type="range" class="param-slider" id="slider-rhythmicVariation" min="0" max="100" step="5" value="0">
+				<input type="number" class="param-number" id="num-rhythmicVariation" min="0" max="100" step="5" value="0">
+			</div>
+		</div>
+		<div class="param-row">
+			<div class="param-header"><span>Dynamic Range (%)</span></div>
+			<div class="param-input-group">
+				<input type="range" class="param-slider" id="slider-dynamicRange" min="0" max="100" step="5" value="0">
+				<input type="number" class="param-number" id="num-dynamicRange" min="0" max="100" step="5" value="0">
+			</div>
+		</div>
 		
-		<button id="resetParamsBtn" class="random-btn" style="margin-top: 10px; font-size: 0.9rem; padding: 10px;">🔄 بازگشت به پیش‌فرض (Reset Defaults)</button>
-		<div id="cacheStatus" class="cache-status">✓ Saved</div>
+		<div class="preset-group" style="display: flex; gap: 8px; margin-top: 10px;">
+			<button id="preset1Btn" class="random-btn" style="flex: 1; font-size: 0.75rem; padding: 10px;">\u{1F3B5} Traditional Flow</button>
+			<button id="preset2Btn" class="random-btn" style="flex: 1; font-size: 0.75rem; padding: 10px;">\u{1F3B6} Expressive Realism</button>
+			<button id="preset3Btn" class="random-btn" style="flex: 1; font-size: 0.75rem; padding: 10px;">\u{1F3BC} Advanced Improv</button>
+		</div>
+		<div id="cacheStatus" class="cache-status">\u2713 Saved</div>
 	</div>
 
 	<!-- Hand Grab Mode Toggle Button -->
-	<button id="handGrabModeBtn" class="random-btn">✋ حالت دست گرفتن</button>
+	<button id="handGrabModeBtn" class="random-btn">\u270B \u062D\u0627\u0644\u062A \u062F\u0633\u062A \u06AF\u0631\u0641\u062A\u0646</button>
 
 	<!-- Source Button (Hidden in hand-grab mode via .btn-group rule) -->
-	<button id="sourceBtn" class="random-btn source-btn">🔗 Source </button>
+	<button id="sourceBtn" class="random-btn source-btn">\u{1F517} Source </button>
 </div>
 
 <!-- Back Button (visible only in hand grab mode) -->
-<button id="backBtn">✕</button>
+<button id="backBtn">\u2715</button>
 
 <script>
 	/* 
@@ -485,6 +548,9 @@ export default {
 	 * 5. Accessibility: Keys and holes have role="button", tabIndex, and aria-labels.
 	 * 6. Hand Grab Mode: Vertical flute with finger-friendly touch targets (55px) and proper margins.
 	 * 7. Note: The 'a' key for G5 is US ANSI layout specific. International users may need adaptation.
+	 * 8. MUSICALITY UPDATE: Unified parameters from all iterations, including velocity, motifs, grace notes, 
+	 *    rhythmic swing, phrase dynamics, portamento slides, and dynamic vibrato. Zero-value edge cases 
+	 *    are explicitly safeguarded to prevent audio engine failures.
 	 */
 
 	const NOTES = [
@@ -626,10 +692,14 @@ export default {
 	}
 
 	// displayKey allows the audio tracking ID to differ from the visual key
-	function playNote(freq, key, displayKey = key) {
+	// Advanced parameters allow profound musical realism (velocity, vibrato, breath, slide)
+	function playNote(freq, key, displayKey = key, velocity = 1.0, vibratoDepth = 2.5, breathNoiseLevel = 0.04, slideDuration = 0.1) {
 		if (activeNotes[key]) return;
 		initAudio();
 		if (audioCtx.state === 'suspended') audioCtx.resume();
+
+		// SAFEGUARD: Ensure velocity doesn't hit exactly 0 to avoid exponential ramp errors
+		velocity = Math.max(0.15, velocity);
 
 		const now = audioCtx.currentTime;
 		const attackTime = 0.15;
@@ -639,13 +709,20 @@ export default {
 		// Main tone oscillator
 		const osc = audioCtx.createOscillator();
 		osc.type = 'sine';
-		osc.frequency.setValueAtTime(freq * 0.98, now);
-		osc.frequency.exponentialRampToValueAtTime(freq, now + 0.1);
+		
+		// Slide/Portamento effect: start slightly flat and slide up to target freq (mimics breath attack)
+		const startFreq = slideDuration > 0 ? freq * 0.97 : freq;
+		osc.frequency.setValueAtTime(startFreq, now);
+		if (slideDuration > 0) {
+			osc.frequency.exponentialRampToValueAtTime(freq, now + slideDuration);
+		} else {
+			osc.frequency.setValueAtTime(freq, now);
+		}
 
 		const oscGain = audioCtx.createGain();
 		oscGain.gain.setValueAtTime(0.0001, now);
-		oscGain.gain.linearRampToValueAtTime(0.5, now + attackTime);
-		oscGain.gain.exponentialRampToValueAtTime(sustainLevel, now + attackTime + decayTime);
+		oscGain.gain.linearRampToValueAtTime(0.5 * velocity, now + attackTime);
+		oscGain.gain.exponentialRampToValueAtTime(sustainLevel * velocity, now + attackTime + decayTime);
 
 		// Breath noise source
 		const whiteNoise = audioCtx.createBufferSource();
@@ -664,16 +741,18 @@ export default {
 
 		const noiseGain = audioCtx.createGain();
 		noiseGain.gain.setValueAtTime(0.0001, now);
-		noiseGain.gain.linearRampToValueAtTime(0.04, now + attackTime);
-		noiseGain.gain.exponentialRampToValueAtTime(0.015, now + attackTime + decayTime);
+		// Tie breath noise dynamically to velocity (louder notes = more breath)
+		noiseGain.gain.linearRampToValueAtTime(breathNoiseLevel * velocity, now + attackTime);
+		noiseGain.gain.exponentialRampToValueAtTime(breathNoiseLevel * 0.6 * velocity, now + attackTime + decayTime);
 
 		// LFO for Vibrato (fades in during sustain, mimicking human player)
 		const lfo = audioCtx.createOscillator();
 		lfo.type = 'sine';
-		lfo.frequency.value = 5.5;
+		lfo.frequency.value = 5.5; // Natural flute vibrato rate ~5.5 Hz
 		const lfoGain = audioCtx.createGain();
 		lfoGain.gain.setValueAtTime(0, now);
-		lfoGain.gain.linearRampToValueAtTime(2.5, now + attackTime + decayTime);
+		// Vibrato depth is in Hz deviation, controlled by parameter (0 is safely inactive)
+		lfoGain.gain.linearRampToValueAtTime(vibratoDepth, now + attackTime + decayTime);
 		lfo.connect(lfoGain);
 		lfoGain.connect(osc.frequency);
 
@@ -829,6 +908,9 @@ export default {
 	let currentDroneKey = null;
 	let droneTimeout = null;
 
+	// Used to track motifs for repetition
+	let lastMotif = []; 
+
 	const harmonyMap = {
 		';': ['j', 'g'], 'l': ['h', 'f'], 'k': ['h', 'g'],
 		'j': [';', 'g'], 'h': ['k', 'f'], 'g': ['j', 'k'],
@@ -841,22 +923,28 @@ export default {
 		return options[Math.floor(Math.random() * options.length)];
 	}
 
-	// === NEW: Dynamic Complex Play Parameters State ===
-	// Defaults are mathematically derived from the original code's random ranges 
-	// to ensure identical baseline behavior.
+	// === Unified Dynamic Complex Play Parameters State ===
 	const defaultParams = {
-		phraseLength: 6,             // Original: 4 + Math.floor(Math.random() * 5) -> mean 6
-		harmonyChance: 45,           // Original: Math.random() < 0.45
-		tempo: 1.0,                  // Original: implicit 1.0x
-		restDuration: 2900,          // Original: 1800 + Math.random() * 2200 -> mean 2900
-		droneDuration: 11500,        // Original: 8000 + Math.random() * 7000 -> mean 11500
-		droneContinueChance: 60,     // Original: Math.random() < 0.6
-		contourBias: 0               // Original: equal 33% split between rising, falling, random
+		phraseLength: 6,
+		harmonyChance: 45,
+		tempo: 1.0,
+		restDuration: 2900,
+		droneDuration: 11500,
+		droneContinueChance: 60,
+		contourBias: 0,
+		vibratoDepth: 2.5,
+		breathNoiseLevel: 0.04,
+		slideDuration: 0.1,
+		dynamicVariation: 0,
+		motifRepeatChance: 0,
+		graceNoteChance: 0,
+		rhythmicVariation: 0,
+		dynamicRange: 0
 	};
 
 	const complexParams = { ...defaultParams };
 
-	// === NEW: Browser Cache (localStorage) Persistence ===
+	// === Browser Cache (localStorage) Persistence ===
 	const CACHE_KEY = 'lakotaFluteComplexParams';
 	const CACHE_STATUS_DURATION = 1500; // ms to show "✓ Saved" indicator
 	let cacheStatusTimeout = null;
@@ -920,11 +1008,79 @@ export default {
 	// Load cached params immediately after defining complexParams
 	loadParamsFromCache();
 
+	// === PRESETS CONFIGURATION ===
+	const presets = {
+		traditional: {
+			phraseLength: 6,
+			harmonyChance: 45,
+			tempo: 1.0,
+			restDuration: 2900,
+			droneDuration: 11500,
+			droneContinueChance: 60,
+			contourBias: 0,
+			vibratoDepth: 2.5,
+			breathNoiseLevel: 0.04,
+			slideDuration: 0.1,
+			dynamicVariation: 0,
+			motifRepeatChance: 0,
+			graceNoteChance: 0,
+			rhythmicVariation: 0,
+			dynamicRange: 0
+		},
+		expressive: {
+			phraseLength: 6,
+			harmonyChance: 35,
+			tempo: 1.0,
+			restDuration: 2500,
+			droneDuration: 10000,
+			droneContinueChance: 50,
+			contourBias: 0,
+			vibratoDepth: 3.0,
+			breathNoiseLevel: 0.025,
+			slideDuration: 0.08,
+			dynamicVariation: 30,
+			motifRepeatChance: 0,
+			graceNoteChance: 0,
+			rhythmicVariation: 0,
+			dynamicRange: 0
+		},
+		advanced: {
+			phraseLength: 8,
+			harmonyChance: 35,
+			tempo: 1.0,
+			restDuration: 2500,
+			droneDuration: 12000,
+			droneContinueChance: 65,
+			contourBias: -20,
+			vibratoDepth: 2.5,
+			breathNoiseLevel: 0.04,
+			slideDuration: 0.1,
+			dynamicVariation: 0,
+			motifRepeatChance: 35,
+			graceNoteChance: 30,
+			rhythmicVariation: 40,
+			dynamicRange: 60
+		}
+	};
+
+	function applyPreset(presetName) {
+		const selectedPreset = presets[presetName];
+		if (!selectedPreset) return;
+		
+		for (const key in selectedPreset) {
+			complexParams[key] = selectedPreset[key];
+		}
+		
+		syncUIWithParams();
+		saveParamsToCache();
+	}
+
 	function startDrone(noteKey) {
 		if (currentDroneKey) stopDrone();
 		const noteData = NOTES.find(n => n.key === noteKey);
 		currentDroneKey = noteKey;
-		playNote(noteData.freq, 'drone-' + noteKey, noteKey);
+		// Drone uses steady velocity, moderate vibrato, low breath noise, and no slide
+		playNote(noteData.freq, 'drone-' + noteKey, noteKey, 0.6, complexParams.vibratoDepth * 0.8, complexParams.breathNoiseLevel * 0.5, 0);
 
 		const droneDuration = complexParams.droneDuration + (Math.random() * 1000 - 500);
 		droneTimeout = setTimeout(() => {
@@ -948,47 +1104,110 @@ export default {
 
 	function generateComplexPhrase() {
 		const melodyRange = [';', 'l', 'k', 'j', 'h', 'g', 'f', 'd'];
-		const length = Math.max(2, complexParams.phraseLength + Math.floor(Math.random() * 3) - 1);
+		const length = Math.max(3, complexParams.phraseLength + Math.floor(Math.random() * 3) - 1);
 		const phrase = [];
 		
 		let prevIdx = Math.floor(Math.random() * melodyRange.length);
 		
+		// MOTIF LOGIC: Decide if we are repeating the last motif
+		let useMotif = complexParams.motifRepeatChance > 0 && Math.random() < (complexParams.motifRepeatChance / 100) && lastMotif.length >= 2;
+		let motif = useMotif ? [...lastMotif] : [];
+		let motifIdx = 0;
+		
 		for (let i = 0; i < length; i++) {
 			let nextIdx;
-			const roll = Math.random();
 			
-			// Read dynamically from complexParams: smoothly interpolate probabilities based on bias
-			const bias = complexParams.contourBias / 100; // -1.0 (falling) to 1.0 (rising)
-			const stepUpProb = 0.65 + (bias * 0.20); // ranges from 0.45 to 0.85
-			const stepDownProb = stepUpProb + 0.20;  // maintain a 20% band for the secondary step
-			
-			if (roll < stepUpProb) {
-				nextIdx = Math.min(melodyRange.length - 1, prevIdx + 1);
-			} else if (roll < stepDownProb) {
-				nextIdx = Math.max(0, prevIdx - 1);
+			if (useMotif && motifIdx < motif.length) {
+				// Repeat motif notes
+				nextIdx = motif[motifIdx];
+				motifIdx++;
 			} else {
-				nextIdx = Math.floor(Math.random() * melodyRange.length);
+				// Generate new note based on contour bias
+				const roll = Math.random();
+				const bias = complexParams.contourBias / 100; // -1.0 (falling) to 1.0 (rising)
+				
+				// Improved probabilities: bias shifts the balance, but maintains musicality
+				const stepUpProb = 0.50 + (bias * 0.30); // Ranges from 0.20 to 0.80
+				const stepDownProb = stepUpProb + 0.35;   // Maintains a 35% band for stepping down
+				
+				if (roll < stepUpProb) {
+					nextIdx = Math.min(melodyRange.length - 1, prevIdx + 1);
+				} else if (roll < stepDownProb) {
+					nextIdx = Math.max(0, prevIdx - 1);
+				} else {
+					// Random leap (15% chance base)
+					nextIdx = Math.floor(Math.random() * melodyRange.length);
+				}
+			}
+			
+			// Store the first 3 notes of this phrase as the new motif
+			if (i < 3) {
+				if (i === 0) lastMotif = [];
+				lastMotif.push(nextIdx);
 			}
 			
 			const noteKey = melodyRange[nextIdx];
 			
-			// Read dynamically from complexParams
+			// Harmony generation
 			let harmonyKey = null;
 			if (Math.random() < (complexParams.harmonyChance / 100) && nextIdx < melodyRange.length - 1) {
 				harmonyKey = pickHarmony(noteKey);
 			}
 			
-			let baseDuration;
-			if (i === 0 || i === length - 1) {
-				baseDuration = 1200 + Math.random() * 1200;
-			} else {
-				baseDuration = 700 + Math.random() * 1100;
+			// RHYTHMIC VARIATION LOGIC: Introduce swing and dotted notes
+			const baseBeat = 600 / complexParams.tempo; 
+			let rhythmMultiplier = 1.0;
+			
+			const variation = complexParams.rhythmicVariation / 100;
+			// SAFEGUARD: Only apply variation if parameter is > 0
+			if (variation > 0) {
+				const swingRoll = Math.random();
+				if (i === 0 || i === length - 1) {
+					rhythmMultiplier = 1.5 + (Math.random() * variation);
+				} else {
+					if (swingRoll < (0.3 * variation)) {
+						rhythmMultiplier = 0.5; // Syncopated short note
+					} else if (swingRoll < (0.6 * variation)) {
+						rhythmMultiplier = 1.5; // Dotted note feel
+					} else {
+						rhythmMultiplier = 1.0; // Standard beat
+					}
+				}
+			}
+			const duration = baseBeat * rhythmMultiplier;
+			
+			// DYNAMIC LOGIC: Combine phrase shape (dynamicRange) with random variation (dynamicVariation)
+			const dynRange = complexParams.dynamicRange / 100;
+			const dynVar = complexParams.dynamicVariation / 100;
+			
+			let velocity = 1.0; // Default steady velocity
+			
+			// SAFEGUARD: Only apply dynamics if parameters are > 0
+			if (dynRange > 0 || dynVar > 0) {
+				const phase = (i / Math.max(1, length - 1)) * Math.PI; // 0 to PI
+				velocity = 0.7 + 0.3 * Math.sin(phase); // Peaks at 1.0 in middle
+				
+				// Apply dynamic range shaping
+				velocity = 1.0 - (dynRange * (1.0 - velocity));
+				
+				// Apply random dynamic variation
+				const randomVar = (Math.random() * dynVar * 2) - dynVar;
+				velocity = velocity + randomVar;
 			}
 			
-			// Read dynamically from complexParams: higher tempo = shorter duration
-			const duration = baseDuration / complexParams.tempo;
+			// SAFEGUARD: Clamp to avoid silence (0) or clipping (>1.0)
+			velocity = Math.max(0.15, Math.min(1.0, velocity));
 			
-			phrase.push({ noteKey, harmonyKey, duration });
+			const noteObj = { noteKey, harmonyKey, duration, velocity };
+			
+			// GRACE NOTE LOGIC: Add a fast grace note right before the main note
+			if (complexParams.graceNoteChance > 0 && Math.random() < (complexParams.graceNoteChance / 100) && i < length - 1) {
+				// Grace note is usually a step above or below the main note
+				let graceIdx = nextIdx > 0 ? nextIdx - 1 : nextIdx + 1;
+				noteObj.graceKey = melodyRange[graceIdx];
+			}
+			
+			phrase.push(noteObj);
 			prevIdx = nextIdx;
 		}
 		return phrase;
@@ -1001,12 +1220,35 @@ export default {
 		let delay = 0;
 		
 		phrase.forEach((note) => {
+			// Handle Grace Note
+			if (note.graceKey) {
+				setTimeout(() => {
+					if (!isComplexPlaying) return;
+					const graceData = NOTES.find(n => n.key === note.graceKey);
+					const gId = 'grace-' + (noteCounter++);
+					// Grace notes are quick, light, with minimal vibrato/breath and a tiny slide
+					playNote(graceData.freq, gId, note.graceKey, note.velocity * 0.8, complexParams.vibratoDepth * 0.3, complexParams.breathNoiseLevel * 0.5, 0.02);
+					setTimeout(() => {
+						if (activeNotes[gId]) stopNote(gId, note.graceKey);
+					}, 120 / complexParams.tempo); // Very short duration based on tempo
+				}, delay);
+				delay += 120 / complexParams.tempo; // Add grace note duration to delay before main note
+			}
+
 			// Schedule melody note
 			setTimeout(() => {
 				if (!isComplexPlaying) return;
 				const noteData = NOTES.find(n => n.key === note.noteKey);
 				const id = 'melody-' + (noteCounter++);
-				playNote(noteData.freq, id, note.noteKey);
+				playNote(
+					noteData.freq, 
+					id, 
+					note.noteKey, 
+					note.velocity, 
+					complexParams.vibratoDepth, 
+					complexParams.breathNoiseLevel, 
+					complexParams.slideDuration
+				);
 				setTimeout(() => {
 					if (activeNotes[id]) stopNote(id, note.noteKey);
 				}, note.duration * 0.9);
@@ -1018,7 +1260,16 @@ export default {
 					if (!isComplexPlaying) return;
 					const harmData = NOTES.find(n => n.key === note.harmonyKey);
 					const id = 'harmony-' + (noteCounter++);
-					playNote(harmData.freq, id, note.harmonyKey);
+					// Harmony is voiced softer, with reduced vibrato and no slide, to support the melody
+					playNote(
+						harmData.freq, 
+						id, 
+						note.harmonyKey, 
+						note.velocity * 0.6, 
+						complexParams.vibratoDepth * 0.5, 
+						complexParams.breathNoiseLevel * 0.8, 
+						0 
+					);
 					setTimeout(() => {
 						if (activeNotes[id]) stopNote(id, note.harmonyKey);
 					}, note.duration * 0.85);
@@ -1038,6 +1289,7 @@ export default {
 	function stopComplexPlay() {
 		isComplexPlaying = false;
 		noteCounter = 0; // FIX: Reset infinite counter to prevent unbounded memory growth
+		lastMotif = []; // Reset motif memory
 		if (complexPlayTimeout) { clearTimeout(complexPlayTimeout); complexPlayTimeout = null; }
 		stopDrone();
 
@@ -1073,7 +1325,7 @@ export default {
 
 	complexBtn.addEventListener('click', () => { initAudio(); playComplexMelody(); });
 
-	// === NEW: Parameters Menu Logic ===
+	// === Parameters Menu Logic ===
 	const paramsToggleBtn = document.getElementById('paramsToggleBtn');
 	const paramsMenu = document.getElementById('paramsMenu');
 	
@@ -1104,32 +1356,32 @@ export default {
 		numInput.addEventListener('change', (e) => updateValue(e.target.value));
 	}
 
-	// Bind all parameter controls
-	bindParamControl('phraseLength', 'slider-phraseLength', 'num-phraseLength', 4, 12, 1);
+	// Bind all parameter controls (unified from all iterations)
+	bindParamControl('phraseLength', 'slider-phraseLength', 'num-phraseLength', 4, 16, 1);
 	bindParamControl('harmonyChance', 'slider-harmonyChance', 'num-harmonyChance', 0, 100, 5);
-	bindParamControl('tempo', 'slider-tempo', 'num-tempo', 0.5, 2.0, 0.1);
-	bindParamControl('restDuration', 'slider-restDuration', 'num-restDuration', 1800, 4000, 100);
-	bindParamControl('droneDuration', 'slider-droneDuration', 'num-droneDuration', 8000, 15000, 500);
+	bindParamControl('tempo', 'slider-tempo', 'num-tempo', 0.3, 3.0, 0.1);
+	bindParamControl('restDuration', 'slider-restDuration', 'num-restDuration', 500, 6000, 100);
+	bindParamControl('droneDuration', 'slider-droneDuration', 'num-droneDuration', 5000, 20000, 500);
 	bindParamControl('droneContinueChance', 'slider-droneContinueChance', 'num-droneContinueChance', 0, 100, 5);
 	bindParamControl('contourBias', 'slider-contourBias', 'num-contourBias', -100, 100, 10);
+	bindParamControl('vibratoDepth', 'slider-vibratoDepth', 'num-vibratoDepth', 0, 8, 0.5);
+	bindParamControl('breathNoiseLevel', 'slider-breathNoiseLevel', 'num-breathNoiseLevel', 0, 0.08, 0.005);
+	bindParamControl('slideDuration', 'slider-slideDuration', 'num-slideDuration', 0, 0.25, 0.01);
+	bindParamControl('dynamicVariation', 'slider-dynamicVariation', 'num-dynamicVariation', 0, 60, 5);
+	bindParamControl('motifRepeatChance', 'slider-motifRepeatChance', 'num-motifRepeatChance', 0, 100, 5);
+	bindParamControl('graceNoteChance', 'slider-graceNoteChance', 'num-graceNoteChance', 0, 100, 5);
+	bindParamControl('rhythmicVariation', 'slider-rhythmicVariation', 'num-rhythmicVariation', 0, 100, 5);
+	bindParamControl('dynamicRange', 'slider-dynamicRange', 'num-dynamicRange', 0, 100, 5);
 
-	// Reset to Defaults Functionality
-	function resetToDefaults() {
-		for (const key in defaultParams) {
-			complexParams[key] = defaultParams[key];
-		}
-		// Sync UI with reset values
-		syncUIWithParams();
-		// Write the reset defaults to browser cache
-		saveParamsToCache();
-	}
-	
-	document.getElementById('resetParamsBtn').addEventListener('click', resetToDefaults);
+	// Preset Button Event Listeners
+	document.getElementById('preset1Btn').addEventListener('click', () => applyPreset('traditional'));
+	document.getElementById('preset2Btn').addEventListener('click', () => applyPreset('expressive'));
+	document.getElementById('preset3Btn').addEventListener('click', () => applyPreset('advanced'));
 
 	// ensures sliders/inputs reflect the cached values, not just HTML defaults
 	syncUIWithParams();
 
-	// === NEW: Source Button Logic ===
+	// === Source Button Logic ===
 	document.getElementById('sourceBtn').addEventListener('click', () => {
 		window.open('https://github.com/mhdsedighi/lakota', '_blank');
 	});
@@ -1153,6 +1405,9 @@ export default {
 
 	// === Global Event Listeners ===
 	window.addEventListener('keydown', (e) => {
+		// Prevent typing in inputs from triggering flute notes
+		if (e.target.tagName === 'INPUT') return;
+		
 		const key = e.key.toLowerCase();
 		const noteData = NOTES.find(n => n.key === key);
 		if (noteData) {
@@ -1164,6 +1419,7 @@ export default {
 	});
 
 	window.addEventListener('keyup', (e) => {
+		if (e.target.tagName === 'INPUT') return;
 		const key = e.key.toLowerCase();
 		if (NOTES.find(n => n.key === key)) stopNote(key);
 	});
@@ -1180,16 +1436,19 @@ export default {
 	document.body.addEventListener('click', initAudio, { once: true });
 	document.body.addEventListener('touchstart', initAudio, { once: true });
 	document.body.addEventListener('keydown', initAudio, { once: true });
-</script>
+<\/script>
 </body>
 </html>`;
-
-		return new Response(html, {
-			headers: {
-				'content-type': 'text/html;charset=UTF-8',
-				'cache-control': 'no-cache, must-revalidate',
-				'cf-cache-status': 'BYPASS',
-			},
-		});
-	},
+    return new Response(html, {
+      headers: {
+        "content-type": "text/html;charset=UTF-8",
+        "cache-control": "no-cache, must-revalidate",
+        "cf-cache-status": "BYPASS"
+      }
+    });
+  }
 };
+export {
+  worker_default as default
+};
+//# sourceMappingURL=worker.js.map
