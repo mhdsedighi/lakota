@@ -179,7 +179,7 @@ var worker_default = {
 	}
 	.random-btn {
 		width: 100%;
-		max-width: 320px
+		max-width: 320px;
 		padding: 14px 28px;
 		font-size: 1.1rem;
 		font-family: 'Georgia', serif;
@@ -1003,10 +1003,10 @@ var worker_default = {
 		try {
 			localStorage.setItem(CACHE_KEY, JSON.stringify(complexParams));
 			console.log('[Cache] Saved latest parameters to browser cache:', { ...complexParams });
-			showCacheStatus('✓ Saved');
+			showCacheStatus('\u2713 Saved');
 		} catch (e) {
 			console.warn('[Cache] Failed to save parameters to browser cache:', e);
-			showCacheStatus('✗ Save failed');
+			showCacheStatus('\u2717 Save failed');
 		}
 	}
 
@@ -1090,7 +1090,7 @@ var worker_default = {
 		}
 	};
 
-	function applyPreset(presetName) {
+	function applyPreset(presetName, activeBtn) {
 		const selectedPreset = presets[presetName];
 		if (!selectedPreset) return;
 		
@@ -1100,6 +1100,10 @@ var worker_default = {
 		
 		syncUIWithParams();
 		saveParamsToCache();
+		
+		// Update visual active state of preset buttons
+		document.querySelectorAll('.preset-group .random-btn').forEach(btn => btn.classList.remove('active'));
+		if (activeBtn) activeBtn.classList.add('active');
 	}
 
 	function startDrone(noteKey) {
@@ -1377,6 +1381,9 @@ var worker_default = {
 			numInput.value = parsed;
 
 			saveParamsToCache();
+			
+			// Clear active state from presets since manual change diverges from the preset
+			document.querySelectorAll('.preset-group .random-btn').forEach(btn => btn.classList.remove('active'));
 		};
 		
 		slider.addEventListener('input', (e) => updateValue(e.target.value));
@@ -1401,9 +1408,9 @@ var worker_default = {
 	bindParamControl('slideDuration', 'slider-slideDuration', 'num-slideDuration', 0, 0.25, 0.01);
 
 	// Preset Button Event Listeners
-	document.getElementById('preset1Btn').addEventListener('click', () => applyPreset('traditional'));
-	document.getElementById('preset2Btn').addEventListener('click', () => applyPreset('expressive'));
-	document.getElementById('preset3Btn').addEventListener('click', () => applyPreset('advanced'));
+	document.getElementById('preset1Btn').addEventListener('click', (e) => applyPreset('traditional', e.currentTarget));
+	document.getElementById('preset2Btn').addEventListener('click', (e) => applyPreset('expressive', e.currentTarget));
+	document.getElementById('preset3Btn').addEventListener('click', (e) => applyPreset('advanced', e.currentTarget));
 
 	// ensures sliders/inputs reflect the cached values, not just HTML defaults
 	syncUIWithParams();
