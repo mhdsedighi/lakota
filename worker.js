@@ -32,13 +32,55 @@ var worker_default = {
         margin-bottom: 15px;
         border: 3px solid #0e0d0dff;
     }
+    
+    /* ===  Header Container to hold Title and Global Settings Button === */
+    .header-container {
+        display: flex;
+        flex-direction: row;
+        align-items: center;
+        justify-content: center;
+        gap: 15px;
+        margin: 0 0 10px 0;
+    }
     h1 { 
         font-size: 2rem; 
         text-shadow: 2px 2px 4px rgba(0,0,0,0.5); 
-        margin: 0 0 10px 0; 
+        margin: 0; 
         color: #d4a373; 
         text-align: center; 
     }
+    .global-gear-btn {
+        background: none;
+        border: none;
+        color: #d4a373;
+        font-size: 1.8rem;
+        cursor: pointer;
+        padding: 0;
+        transition: transform 0.2s ease;
+        -webkit-tap-highlight-color: transparent;
+    }
+    .global-gear-btn:hover {
+        transform: rotate(45deg);
+    }
+    
+    /* ===  Global Parameters Menu === */
+    .global-params-menu {
+        display: none;
+        flex-direction: column;
+        gap: 12px;
+        margin-bottom: 20px;
+        width: 90%;
+        max-width: 400px;
+        background: rgba(32, 13, 1, 0.95);
+        border: 2px solid #8b5a2b;
+        border-radius: 12px;
+        padding: 16px;
+        box-shadow: 0 8px 20px rgba(0,0,0,0.6);
+    }
+    .global-params-menu.open {
+        display: flex;
+    }
+    
     .instructions { 
         margin-bottom: 20px; 
         font-size: 1rem; 
@@ -84,7 +126,7 @@ var worker_default = {
         color: #fff;
     }
 
-    /* === NEW: Flute Visual Container to hold Overblow Button and Flute === */
+    /* ===  Flute Visual Container to hold Overblow Button and Flute === */
     .flute-visual-container {
         display: flex;
         flex-direction: row;
@@ -96,7 +138,7 @@ var worker_default = {
         margin-top: 25px;
     }
     
-    /* === NEW: Overblow Button Styles === */
+    /* ===  Overblow Button Styles === */
     #overblowBtn {
         background: linear-gradient(180deg, #8b0000 0%, #5c0000 100%);
         color: #f4e4d4;
@@ -149,7 +191,7 @@ var worker_default = {
         background: #d4a373; 
         box-shadow: 0 0 15px #d4a373, inset 0 2px 4px rgba(0,0,0,0.8); 
     }
-    /* NEW: Red color for holes when overblow is active */
+    /*  Red color for holes when overblow is active */
     .hole.active-overblow { 
         background: #ff4d4d; 
         box-shadow: 0 0 15px #ff4d4d, inset 0 2px 4px rgba(0,0,0,0.8); 
@@ -187,7 +229,7 @@ var worker_default = {
         box-shadow: 0 0 25px #d4a373, inset 0 4px 8px rgba(0,0,0,0.5);
         transform: scale(0.92);
     }
-    /* NEW: Red color for vertical holes when overblow is active */
+    /*  Red color for vertical holes when overblow is active */
     .v-hole.active-overblow {
         background: #ff4d4d;
         box-shadow: 0 0 25px #ff4d4d, inset 0 4px 8px rgba(0,0,0,0.5);
@@ -196,8 +238,10 @@ var worker_default = {
     
     /* Hide standard UI elements when in hand grab mode */
     /* FIX: Hide .flute-visual instead of .flute-visual-container so #overblowBtn isn't hidden by its parent */
+    /* FIX: Also hide the new header-container and global-params-menu */
     body.hand-grab-mode .flute-image,
-    body.hand-grab-mode h1,
+    body.hand-grab-mode .header-container,
+    body.hand-grab-mode .global-params-menu,
     body.hand-grab-mode .instructions,
     body.hand-grab-mode .keyboard,
     body.hand-grab-mode .flute-visual,
@@ -298,7 +342,7 @@ var worker_default = {
         background: linear-gradient(180deg, #3a7a60 0%, #2c5e4a 100%);
     }
 
-    /* === NEW: Parameters Menu Styles === */
+    /* ===  Parameters Menu Styles === */
     /* Row container that holds the complex button and the small params button side-by-side */
     .complex-row {
         display: flex;
@@ -473,12 +517,38 @@ var worker_default = {
 
 <img src="https://images.squarespace-cdn.com/content/v1/56fae4be1d07c0c393d8faa5/1556034153700-O4M9FPFDCMRX1DNQ2S6W/Flute.jpg" alt="Lakota Flute" class="flute-image">
 
-<h1>\u{1FAB6} Lakota Flute \u{1FAB6}</h1>
+<!--  Header Container holding Title and Global Settings Button -->
+<div class="header-container">
+    <h1>\u{1FAB6} Lakota Flute \u{1FAB6}</h1>
+    <button id="globalParamsToggleBtn" class="global-gear-btn" title="Global Settings - \u062A\u0646\u0638\u06CC\u0645\u0627\u062A \u0639\u0645\u0648\u0645\u06CC">\u2699\uFE0F</button>
+</div>
+
+<!--  Global Parameters Menu -->
+<div id="globalParamsMenu" class="global-params-menu">
+    <div class="params-grid">
+        <div class="param-row">
+            <div class="param-header"><span>Vibrato Depth (Hz)</span></div>
+            <div class="param-input-group">
+                <input type="range" class="param-slider" id="global-slider-vibratoDepth" min="0" max="8" step="0.5" value="2.5">
+                <input type="number" class="param-number" id="global-num-vibratoDepth" min="0" max="8" step="0.5" value="2.5">
+            </div>
+        </div>
+        <div class="param-row">
+            <div class="param-header"><span>Breath Noise Level</span></div>
+            <div class="param-input-group">
+                <input type="range" class="param-slider" id="global-slider-breathNoiseLevel" min="0" max="0.08" step="0.005" value="0.04">
+                <input type="number" class="param-number" id="global-num-breathNoiseLevel" min="0" max="0.08" step="0.005" value="0.04">
+            </div>
+        </div>
+    </div>
+    <button id="globalResetBtn" class="random-btn" style="margin-top: 12px; font-size: 0.85rem; padding: 10px; max-width: 200px; align-self: center;">Reset - پیشفرض</button>
+</div>
+
 <p class="instructions">Click keys or flute holes, use your keyboard (A-L, ;), or play a soothing random melody.</p>
 
 <div class="keyboard" id="keyboard"></div>
 
-<!-- NEW: Flex container to hold Overblow Button (left) and Flute Visual (right) -->
+<!--  Flex container to hold Overblow Button (left) and Flute Visual (right) -->
 <div class="flute-visual-container">
     <button id="overblowBtn">Overblow<br>دم شدید</button>
     <div class="flute-visual" id="fluteVisual"></div>
@@ -593,20 +663,6 @@ var worker_default = {
             
             <!-- Tone & Expression -->
             <div class="param-row">
-                <div class="param-header"><span>Vibrato Depth (Hz)</span></div>
-                <div class="param-input-group">
-                    <input type="range" class="param-slider" id="slider-vibratoDepth" min="0" max="8" step="0.5" value="2.5">
-                    <input type="number" class="param-number" id="num-vibratoDepth" min="0" max="8" step="0.5" value="2.5">
-                </div>
-            </div>
-            <div class="param-row">
-                <div class="param-header"><span>Breath Noise Level</span></div>
-                <div class="param-input-group">
-                    <input type="range" class="param-slider" id="slider-breathNoiseLevel" min="0" max="0.08" step="0.005" value="0.04">
-                    <input type="number" class="param-number" id="num-breathNoiseLevel" min="0" max="0.08" step="0.005" value="0.04">
-                </div>
-            </div>
-            <div class="param-row">
                 <div class="param-header"><span>Slide Duration (s)</span></div>
                 <div class="param-input-group">
                     <input type="range" class="param-slider" id="slider-slideDuration" min="0" max="0.25" step="0.01" value="0.1">
@@ -658,6 +714,9 @@ var worker_default = {
      *     frequency together. The complex procedural engine now restricts the melody and harmony to the same 
      *     register. If a drone (base note) is active, the melody remains base. When the drone rests, the melody 
      *     can explore overblows. This prevents sudden jumps and maintains physical realism.
+     * 12. GLOBAL SETTINGS MENU: Vibrato and Breath Noise are now global settings, available in all modes 
+     *     (manual, simple, complex). They are housed in a separate gear menu next to the title and are cached 
+     *     independently. They are read instantly during playNote execution.
      */
 
     // NOTES array now distinguishes between base holes and overblows to map visuals correctly.
@@ -733,7 +792,7 @@ var worker_default = {
             }
         }
         
-        playNote(freqToPlay, activeKey, dispKey, 1.0, complexParams.vibratoDepth, complexParams.breathNoiseLevel, complexParams.slideDuration, isOver);
+        playNote(freqToPlay, activeKey, dispKey, 1.0, globalParams.vibratoDepth, globalParams.breathNoiseLevel, complexParams.slideDuration, isOver);
     }
 
     function handleStopPlaying(n, e) {
@@ -911,7 +970,9 @@ var worker_default = {
         noiseGain.gain.setValueAtTime(0.0001, now);
         // Tie breath noise dynamically to velocity (louder notes = more breath)
         noiseGain.gain.linearRampToValueAtTime(breathNoiseLevel * velocity, now + attackTime);
-        noiseGain.gain.exponentialRampToValueAtTime(breathNoiseLevel * 0.6 * velocity, now + attackTime + decayTime);
+
+        const safeDecayLevel = Math.max(0.0001, breathNoiseLevel * 0.6 * velocity);
+        noiseGain.gain.exponentialRampToValueAtTime(safeDecayLevel, now + attackTime + decayTime);
 
         // LFO for Vibrato (fades in during sustain, mimicking human player)
         const lfo = audioCtx.createOscillator();
@@ -1092,8 +1153,8 @@ var worker_default = {
             }
             const noteData = NOTES.find(n => n.key === selected.key);
             const duration = 1200 + Math.random() * 1800;
-            // Updated to pass new parameters correctly
-            playNote(noteData.freq, noteData.key, noteData.baseKey, 1.0, complexParams.vibratoDepth, complexParams.breathNoiseLevel, complexParams.slideDuration, noteData.isOverblow);
+            // Updated to pass new parameters correctly (using globalParams)
+            playNote(noteData.freq, noteData.key, noteData.baseKey, 1.0, globalParams.vibratoDepth, globalParams.breathNoiseLevel, complexParams.slideDuration, noteData.isOverblow);
             randomPlayTimeout = setTimeout(() => {
                 stopNote(noteData.key, noteData.baseKey);
                 randomPlayTimeout = setTimeout(scheduleNext, 100 + Math.random() * 200);
@@ -1115,7 +1176,7 @@ var worker_default = {
     // Used to track motifs for repetition
     let lastMotif = []; 
 
-    // HARMONY MAP: Separated base harmonies and overblow harmonies.
+    // HARMONY MAP UPDATE: Separated base harmonies and overblow harmonies.
     // Flute physics dictate a normal and overblow cannot be played together.
     const harmonyMap = {
         // Base note harmonies (mapped to other base notes)
@@ -1129,6 +1190,7 @@ var worker_default = {
         const options = harmonyMap[melodyKey];
         if (!options || options.length === 0) return null;
         // SAFEGUARD: Filter harmony options to strictly match the overblow register of the melody note.
+        // This ensures a base note never harmonizes with an overblow note.
         const melodyIsOverblow = NOTES.find(n => n.key === melodyKey).isOverblow;
         const validOptions = options.filter(optKey => {
             const optNote = NOTES.find(n => n.key === optKey);
@@ -1147,8 +1209,6 @@ var worker_default = {
         droneDuration: 11500,
         droneContinueChance: 60,
         contourBias: 0,
-        vibratoDepth: 2.5,
-        breathNoiseLevel: 0.04,
         slideDuration: 0.1,
         dynamicVariation: 0,
         motifRepeatChance: 0,
@@ -1159,8 +1219,16 @@ var worker_default = {
 
     const complexParams = { ...defaultParams };
 
+    // ===  Global Parameters State (Vibrato & Breath Noise) ===
+    const defaultGlobalParams = {
+        vibratoDepth: 2.5,
+        breathNoiseLevel: 0.04
+    };
+    const globalParams = { ...defaultGlobalParams };
+
     // === Browser Cache (localStorage) Persistence ===
     const CACHE_KEY = 'lakotaFluteComplexParams';
+    const GLOBAL_CACHE_KEY = 'lakotaFluteGlobalParams';
     const CACHE_STATUS_DURATION = 1500; // ms to show "✓ Saved" indicator
     let cacheStatusTimeout = null;
 
@@ -1198,6 +1266,31 @@ var worker_default = {
         }
     }
 
+    // ===  Global Parameters Cache Functions ===
+    function loadGlobalParamsFromCache() {
+        try {
+            const cached = localStorage.getItem(GLOBAL_CACHE_KEY);
+            if (cached) {
+                const parsed = JSON.parse(cached);
+                for (const key in defaultGlobalParams) {
+                    if (parsed[key] !== undefined && !isNaN(parsed[key])) {
+                        globalParams[key] = parsed[key];
+                    }
+                }
+            }
+        } catch (e) {
+            console.warn('[Cache] Failed to load global parameters from browser cache:', e);
+        }
+    }
+
+    function saveGlobalParamsToCache() {
+        try {
+            localStorage.setItem(GLOBAL_CACHE_KEY, JSON.stringify(globalParams));
+        } catch (e) {
+            console.warn('[Cache] Failed to save global parameters to browser cache:', e);
+        }
+    }
+
     // Show a brief visual indicator that values were saved
     function showCacheStatus(message) {
         const statusEl = document.getElementById('cacheStatus');
@@ -1220,61 +1313,39 @@ var worker_default = {
         }
     }
 
-    // Load cached params immediately after defining complexParams
+    // ===  Sync Global UI Controls ===
+    function syncGlobalUIWithParams() {
+        for (const key in globalParams) {
+            const slider = document.getElementById('global-slider-' + key);
+            const numInput = document.getElementById('global-num-' + key);
+            if (slider) slider.value = globalParams[key];
+            if (numInput) numInput.value = globalParams[key];
+        }
+    }
+
+    // Load cached params immediately after defining objects
     loadParamsFromCache();
+    loadGlobalParamsFromCache();
 
     // === PRESETS CONFIGURATION ===
     const presets = {
         traditional: {
-            phraseLength: 6,
-            harmonyChance: 45,
-            tempo: 1.0,
-            restDuration: 2900,
-            droneDuration: 11500,
-            droneContinueChance: 60,
-            contourBias: 0,
-            vibratoDepth: 2.5,
-            breathNoiseLevel: 0.04,
-            slideDuration: 0.1,
-            dynamicVariation: 0,
-            motifRepeatChance: 0,
-            graceNoteChance: 0,
-            rhythmicVariation: 0,
-            dynamicRange: 0
+            phraseLength: 6, harmonyChance: 45, tempo: 1.0, restDuration: 2900,
+            droneDuration: 11500, droneContinueChance: 60, contourBias: 0,
+            slideDuration: 0.1, dynamicVariation: 0, motifRepeatChance: 0,
+            graceNoteChance: 0, rhythmicVariation: 0, dynamicRange: 0
         },
         expressive: {
-            phraseLength: 6,
-            harmonyChance: 35,
-            tempo: 1.0,
-            restDuration: 2500,
-            droneDuration: 10000,
-            droneContinueChance: 50,
-            contourBias: 0,
-            vibratoDepth: 3.0,
-            breathNoiseLevel: 0.025,
-            slideDuration: 0.08,
-            dynamicVariation: 30,
-            motifRepeatChance: 0,
-            graceNoteChance: 0,
-            rhythmicVariation: 0,
-            dynamicRange: 0
+            phraseLength: 6, harmonyChance: 35, tempo: 1.0, restDuration: 2500,
+            droneDuration: 10000, droneContinueChance: 50, contourBias: 0,
+            slideDuration: 0.08, dynamicVariation: 30, motifRepeatChance: 0,
+            graceNoteChance: 0, rhythmicVariation: 0, dynamicRange: 0
         },
         advanced: {
-            phraseLength: 8,
-            harmonyChance: 35,
-            tempo: 1.0,
-            restDuration: 2500,
-            droneDuration: 12000,
-            droneContinueChance: 65,
-            contourBias: -20,
-            vibratoDepth: 2.5,
-            breathNoiseLevel: 0.04,
-            slideDuration: 0.1,
-            dynamicVariation: 0,
-            motifRepeatChance: 35,
-            graceNoteChance: 30,
-            rhythmicVariation: 40,
-            dynamicRange: 60
+            phraseLength: 8, harmonyChance: 35, tempo: 1.0, restDuration: 2500,
+            droneDuration: 12000, droneContinueChance: 65, contourBias: -20,
+            slideDuration: 0.1, dynamicVariation: 0, motifRepeatChance: 35,
+            graceNoteChance: 30, rhythmicVariation: 40, dynamicRange: 60
         }
     };
 
@@ -1299,8 +1370,8 @@ var worker_default = {
         const noteData = NOTES.find(n => n.key === noteKey);
         currentDroneKey = noteKey;
         // Drone uses steady velocity, moderate vibrato, low breath noise, and no slide
-        // Updated to pass new parameters correctly
-        playNote(noteData.freq, 'drone-' + noteKey, noteData.baseKey, 0.6, complexParams.vibratoDepth * 0.8, complexParams.breathNoiseLevel * 0.5, 0, noteData.isOverblow);
+        // Updated to use globalParams for vibrato and breath noise
+        playNote(noteData.freq, 'drone-' + noteKey, noteData.baseKey, 0.6, globalParams.vibratoDepth * 0.8, globalParams.breathNoiseLevel * 0.5, 0, noteData.isOverblow);
 
         const droneDuration = complexParams.droneDuration + (Math.random() * 1000 - 500);
         droneTimeout = setTimeout(() => {
@@ -1466,8 +1537,7 @@ var worker_default = {
                     const graceData = NOTES.find(n => n.key === note.graceKey);
                     const gId = 'grace-' + (noteCounter++);
                     // Grace notes are quick, light, with minimal vibrato/breath and a tiny slide
-                    // Updated to pass new parameters correctly
-                    playNote(graceData.freq, gId, graceData.baseKey, note.velocity * 0.8, complexParams.vibratoDepth * 0.3, complexParams.breathNoiseLevel * 0.5, 0.02, graceData.isOverblow);
+                    playNote(graceData.freq, gId, graceData.baseKey, note.velocity * 0.8, globalParams.vibratoDepth * 0.3, globalParams.breathNoiseLevel * 0.5, 0.02, graceData.isOverblow);
                     setTimeout(() => {
                         if (activeNotes[gId]) stopNote(gId, graceData.baseKey);
                     }, 120 / complexParams.tempo); // Very short duration based on tempo
@@ -1480,14 +1550,13 @@ var worker_default = {
                 if (!isComplexPlaying) return;
                 const noteData = NOTES.find(n => n.key === note.noteKey);
                 const id = 'melody-' + (noteCounter++);
-                // Updated to pass new parameters correctly
                 playNote(
                     noteData.freq, 
                     id, 
                     noteData.baseKey, 
                     note.velocity, 
-                    complexParams.vibratoDepth, 
-                    complexParams.breathNoiseLevel, 
+                    globalParams.vibratoDepth, 
+                    globalParams.breathNoiseLevel, 
                     complexParams.slideDuration, 
                     noteData.isOverblow
                 );
@@ -1503,14 +1572,13 @@ var worker_default = {
                     const harmData = NOTES.find(n => n.key === note.harmonyKey);
                     const id = 'harmony-' + (noteCounter++);
                     // Harmony is voiced softer, with reduced vibrato and no slide, to support the melody
-                    // Updated to pass new parameters correctly
                     playNote(
                         harmData.freq, 
                         id, 
                         harmData.baseKey, 
                         note.velocity * 0.6, 
-                        complexParams.vibratoDepth * 0.5, 
-                        complexParams.breathNoiseLevel * 0.8, 
+                        globalParams.vibratoDepth * 0.5, 
+                        globalParams.breathNoiseLevel * 0.8, 
                         0, 
                         harmData.isOverblow
                     );
@@ -1616,8 +1684,6 @@ var worker_default = {
     bindParamControl('dynamicVariation', 'slider-dynamicVariation', 'num-dynamicVariation', 0, 60, 5);
     bindParamControl('droneDuration', 'slider-droneDuration', 'num-droneDuration', 5000, 20000, 500);
     bindParamControl('droneContinueChance', 'slider-droneContinueChance', 'num-droneContinueChance', 0, 100, 5);
-    bindParamControl('vibratoDepth', 'slider-vibratoDepth', 'num-vibratoDepth', 0, 8, 0.5);
-    bindParamControl('breathNoiseLevel', 'slider-breathNoiseLevel', 'num-breathNoiseLevel', 0, 0.08, 0.005);
     bindParamControl('slideDuration', 'slider-slideDuration', 'num-slideDuration', 0, 0.25, 0.01);
 
     // Preset Button Event Listeners
@@ -1627,6 +1693,51 @@ var worker_default = {
 
     // ensures sliders/inputs reflect the cached values, not just HTML defaults
     syncUIWithParams();
+
+    // ===  Global Parameters Menu Logic ===
+    const globalParamsToggleBtn = document.getElementById('globalParamsToggleBtn');
+    const globalParamsMenu = document.getElementById('globalParamsMenu');
+    const globalResetBtn = document.getElementById('globalResetBtn');
+    
+    globalParamsToggleBtn.addEventListener('click', () => {
+        globalParamsMenu.classList.toggle('open');
+    });
+
+    function bindGlobalParamControl(paramKey, sliderId, numId, min, max, step) {
+        const slider = document.getElementById(sliderId);
+        const numInput = document.getElementById(numId);
+        
+        const updateValue = (val) => {
+            let parsed = parseFloat(val);
+            if (isNaN(parsed)) parsed = globalParams[paramKey];
+            // Clamp value
+            parsed = Math.max(min, Math.min(max, parsed));
+            
+            globalParams[paramKey] = parsed;
+            slider.value = parsed;
+            numInput.value = parsed;
+
+            saveGlobalParamsToCache();
+        };
+        
+        slider.addEventListener('input', (e) => updateValue(e.target.value));
+        numInput.addEventListener('change', (e) => updateValue(e.target.value));
+    }
+
+    // Bind Global Parameter Controls
+    bindGlobalParamControl('vibratoDepth', 'global-slider-vibratoDepth', 'global-num-vibratoDepth', 0, 8, 0.5);
+    bindGlobalParamControl('breathNoiseLevel', 'global-slider-breathNoiseLevel', 'global-num-breathNoiseLevel', 0, 0.08, 0.005);
+
+    globalResetBtn.addEventListener('click', () => {
+        for (const key in defaultGlobalParams) {
+            globalParams[key] = defaultGlobalParams[key];
+        }
+        syncGlobalUIWithParams();
+        saveGlobalParamsToCache();
+    });
+
+    // Sync global UI with cached values on startup
+    syncGlobalUIWithParams();
 
     // === Source Button Logic ===
     document.getElementById('sourceBtn').addEventListener('click', () => {
@@ -1672,13 +1783,13 @@ var worker_default = {
             if (isOverblowing && !noteData.isOverblow) {
                 const overNote = NOTES.find(on => on.baseKey === noteData.key && on.isOverblow);
                 if (overNote) {
-                    playNote(overNote.freq, overNote.key, overNote.baseKey, 1.0, complexParams.vibratoDepth, complexParams.breathNoiseLevel, complexParams.slideDuration, true);
+                    playNote(overNote.freq, overNote.key, overNote.baseKey, 1.0, globalParams.vibratoDepth, globalParams.breathNoiseLevel, complexParams.slideDuration, true);
                     return;
                 }
             }
             
             // Normal play
-            playNote(noteData.freq, noteData.key, noteData.baseKey, 1.0, complexParams.vibratoDepth, complexParams.breathNoiseLevel, complexParams.slideDuration, noteData.isOverblow);
+            playNote(noteData.freq, noteData.key, noteData.baseKey, 1.0, globalParams.vibratoDepth, globalParams.breathNoiseLevel, complexParams.slideDuration, noteData.isOverblow);
         }
     });
 
