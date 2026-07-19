@@ -761,16 +761,64 @@ var worker_default = {
         if (e) e.preventDefault();
         isOverblowing = true;
         overblowBtn.classList.add('active');
+        
+        // If there are active base notes, switch them to overblow notes
+        const notesToSwitch = [];
+        for (const key in activeNotes) {
+            const note = activeNotes[key];
+            if (!note.isOverblowNote) {
+                const noteData = NOTES.find(n => n.key === note.visualKey);
+                if (noteData && !noteData.isOverblow) {
+                    const overNote = NOTES.find(on => on.baseKey === noteData.key && on.isOverblow);
+                    if (overNote) {
+                        notesToSwitch.push({ 
+                            currentKey: key,
+                            overKey: overNote.key, 
+                            overFreq: overNote.freq, 
+                            overBaseKey: overNote.baseKey, 
+                            visualKey: noteData.key 
+                        });
+                    }
+                }
+            }
+        }
+        
+        notesToSwitch.forEach(switchInfo => {
+            stopNote(switchInfo.currentKey, switchInfo.overBaseKey, switchInfo.visualKey);
+            playNote(switchInfo.overFreq, switchInfo.overKey, switchInfo.overBaseKey, 1.0, globalParams.vibratoDepth, globalParams.breathNoiseLevel, complexParams.slideDuration, true, switchInfo.visualKey);
+        });
     };
+
     const stopOverblow = (e) => {
         if (e) e.preventDefault();
         isOverblowing = false;
-        // Only remove visual if no overblow notes are currently active
-        const isAnyOverblowActive = Object.values(activeNotes).some(n => n.isOverblowNote);
-        if (!isAnyOverblowActive) {
-            overblowBtn.classList.remove('active');
+        
+        // If there are active overblow notes, switch them back to base notes to prevent sticking
+        const notesToSwitch = [];
+        for (const key in activeNotes) {
+            const note = activeNotes[key];
+            if (note.isOverblowNote) {
+                const baseNote = NOTES.find(n => n.key === note.visualKey && !n.isOverblow);
+                if (baseNote) {
+                    notesToSwitch.push({
+                        currentKey: key,
+                        baseKey: baseNote.key,
+                        baseFreq: baseNote.freq,
+                        baseBaseKey: baseNote.baseKey,
+                        visualKey: note.visualKey
+                    });
+                }
+            }
         }
+        
+        notesToSwitch.forEach(switchInfo => {
+            stopNote(switchInfo.currentKey, switchInfo.baseBaseKey, switchInfo.visualKey);
+            playNote(switchInfo.baseFreq, switchInfo.baseKey, switchInfo.baseBaseKey, 1.0, globalParams.vibratoDepth, globalParams.breathNoiseLevel, complexParams.slideDuration, false, switchInfo.visualKey);
+        });
+
+        overblowBtn.classList.remove('active');
     };
+
     overblowBtn.addEventListener('mousedown', startOverblow);
     overblowBtn.addEventListener('mouseup', stopOverblow);
     overblowBtn.addEventListener('mouseleave', stopOverblow);
@@ -799,7 +847,7 @@ var worker_default = {
             }
         }
         
-        playNote(freqToPlay, activeKey, dispKey, 1.0, globalParams.vibratoDepth, globalParams.breathNoiseLevel, complexParams.slideDuration, isOver);
+        playNote(freqToPlay, activeKey, dispKey, 1.0, globalParams.vibratoDepth, globalParams.breathNoiseLevel, complexParams.slideDuration, isOver, n.key);
     }
 
     function handleStopPlaying(n, e) {
@@ -811,7 +859,7 @@ var worker_default = {
             if (overNote) activeKey = overNote.key;
         }
         // displayKey is always n.baseKey when interacting with a hole
-        stopNote(activeKey, n.baseKey);
+        stopNote(activeKey, n.baseKey, n.key);
     }
 
     // Render all 10 keyboard keys
@@ -1168,9 +1216,9 @@ var worker_default = {
             const noteData = NOTES.find(n => n.key === selected.key);
             const duration = 1200 + Math.random() * 1800;
             // Updated to pass new parameters correctly (using globalParams)
-            playNote(noteData.freq, noteData.key, noteData.baseKey, 1.0, globalParams.vibratoDepth, globalParams.breathNoiseLevel, complexParams.slideDuration, noteData.isOverblow);
+            playNote(noteData.freq, noteData.key, noteData.baseKey, 1.0, globalParams.vibratoDepth, globalParams.breathNoiseLevel, complexParams.slideDuration, noteData.isOverblow, noteData.key);
             randomPlayTimeout = setTimeout(() => {
-                stopNote(noteData.key, noteData.baseKey);
+                stopNote(noteData.key, noteData.baseKey, noteData.key);
                 randomPlayTimeout = setTimeout(scheduleNext, 100 + Math.random() * 200);
             }, duration);
         }
@@ -1799,13 +1847,13 @@ var worker_default = {
             if (isOverblowing && !noteData.isOverblow) {
                 const overNote = NOTES.find(on => on.baseKey === noteData.key && on.isOverblow);
                 if (overNote) {
-                    playNote(overNote.freq, overNote.key, overNote.baseKey, 1.0, globalParams.vibratoDepth, globalParams.breathNoiseLevel, complexParams.slideDuration, true);
+                    playNote(overNote.freq, overNote.key, overNote.baseKey, 1.0, globalParams.vibratoDepth, globalParams.breathNoiseLevel, complexParams.slideDuration, true, noteData.key);
                     return;
                 }
             }
             
             // Normal play
-            playNote(noteData.freq, noteData.key, noteData.baseKey, 1.0, globalParams.vibratoDepth, globalParams.breathNoiseLevel, complexParams.slideDuration, noteData.isOverblow);
+            playNote(noteData.freq, noteData.key, noteData.baseKey, 1.0, globalParams.vibratoDepth, globalParams.breathNoiseLevel, complexParams.slideDuration, noteData.isOverblow, noteData.key);
         }
     });
 
@@ -1825,11 +1873,11 @@ var worker_default = {
             if (isOverblowing && !noteData.isOverblow) {
                 const overNote = NOTES.find(on => on.baseKey === noteData.key && on.isOverblow);
                 if (overNote) {
-                    stopNote(overNote.key, overNote.baseKey);
+                    stopNote(overNote.key, overNote.baseKey, noteData.key);
                     return;
                 }
             }
-            stopNote(noteData.key, noteData.baseKey);
+            stopNote(noteData.key, noteData.baseKey, noteData.key);
         }
     });
 
