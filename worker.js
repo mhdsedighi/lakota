@@ -8,11 +8,17 @@ var worker_default = {
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
 <title>Lakota Flute Simulator</title>
+
+<!-- Importing Vazirmatn font from Google Fonts for perfect Persian rendering -->
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Vazirmatn:wght@400;500;700&display=swap" rel="stylesheet">
+
 <style>
     body {
         background: linear-gradient(135deg, #200d01 0%, #200d01 100%);
         color: #e8d5c4;
-        font-family: 'Georgia', serif;
+        font-family: 'Vazirmatn', sans-serif; /* Changed to Vazirmatn for Persian support */
         display: flex;
         flex-direction: column;
         align-items: center;
@@ -111,6 +117,7 @@ var worker_default = {
         font-size: 1.2rem; 
         font-weight: bold; 
         color: #f4e4d4;
+        font-family: 'Vazirmatn', sans-serif; /* Changed to Vazirmatn */
         box-shadow: 0 6px 0 #3e2312, 0 10px 8px rgba(0,0,0,0.4);
         transition: all 0.1s ease; 
         user-select: none; 
@@ -144,7 +151,7 @@ var worker_default = {
         color: #f4e4d4;
         border: 2px solid #3e2312;
         border-radius: 12px;
-        font-family: 'Georgia', serif;
+        font-family: 'Vazirmatn', sans-serif; /* Changed to Vazirmatn */
         cursor: pointer;
         touch-action: manipulation;
         -webkit-tap-highlight-color: transparent;
@@ -293,7 +300,7 @@ var worker_default = {
         max-width: 320px;
         padding: 14px 28px;
         font-size: 1.1rem;
-        font-family: 'Georgia', serif;
+        font-family: 'Vazirmatn', sans-serif; /* Changed to Vazirmatn */
         color: #f4e4d4;
         background: linear-gradient(180deg, #6b4423 0%, #4a2c17 100%);
         border: 2px solid #8b5a2b;
@@ -464,7 +471,7 @@ var worker_default = {
         border-radius: 6px;
         padding: 4px;
         text-align: center;
-        font-family: 'Georgia', serif;
+        font-family: 'Vazirmatn', sans-serif; /* Changed to Vazirmatn */
         font-size: 0.85rem;
     }
     .param-number:focus {
