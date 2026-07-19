@@ -654,6 +654,10 @@ var worker_default = {
      *    Overblow frequencies are now triggered via a dedicated "Overblow" button (or Shift key) alongside a hole.
      * 10. OVERBLOW VISUALS: When an overblow note is played, the associated hole glows RED. The Overblow
      *     button and the 10 individual keyboard buttons retain their exact original functionality and visuals.
+     * 11. FLUTE PHYSICS ENFORCEMENT (RANDOM PLAY): It is physically impossible to play a normal and overblow 
+     *     frequency together. The complex procedural engine now restricts the melody and harmony to the same 
+     *     register. If a drone (base note) is active, the melody remains base. When the drone rests, the melody 
+     *     can explore overblows. This prevents sudden jumps and maintains physical realism.
      */
 
     // NOTES array now distinguishes between base holes and overblows to map visuals correctly.
@@ -1111,16 +1115,27 @@ var worker_default = {
     // Used to track motifs for repetition
     let lastMotif = []; 
 
+    // HARMONY MAP: Separated base harmonies and overblow harmonies.
+    // Flute physics dictate a normal and overblow cannot be played together.
     const harmonyMap = {
-        ';': ['j', 'g'], 'l': ['h', 'f'], 'k': ['h', 'g'],
-        'j': [';', 'g'], 'h': ['k', 'f'], 'g': ['j', 'k'],
-        'f': ['h', 'g'], 'd': ['g', 'h']
+        // Base note harmonies (mapped to other base notes)
+        ';': ['j', 'g'], 'l': ['h'], 'k': ['h', 'g'],
+        'j': [';', 'g'], 'h': ['k'], 'g': ['j', 'k'],
+        // Overblow harmonies (mapped to other overblows)
+        'f': ['a'], 'd': ['s', 'a'], 's': ['d', 'f'], 'a': ['f', 'd']
     };
 
     function pickHarmony(melodyKey) {
         const options = harmonyMap[melodyKey];
         if (!options || options.length === 0) return null;
-        return options[Math.floor(Math.random() * options.length)];
+        // SAFEGUARD: Filter harmony options to strictly match the overblow register of the melody note.
+        const melodyIsOverblow = NOTES.find(n => n.key === melodyKey).isOverblow;
+        const validOptions = options.filter(optKey => {
+            const optNote = NOTES.find(n => n.key === optKey);
+            return optNote && optNote.isOverblow === melodyIsOverblow;
+        });
+        if (validOptions.length === 0) return null;
+        return validOptions[Math.floor(Math.random() * validOptions.length)];
     }
 
     // === Unified Dynamic Complex Play Parameters State ===
@@ -1309,7 +1324,19 @@ var worker_default = {
     }
 
     function generateComplexPhrase() {
-        const melodyRange = [';', 'l', 'k', 'j', 'h', 'g', 'f', 'd'];
+        // FLUTE PHYSICS ENFORCEMENT: If a drone is active, the melody must remain in the same register
+        // (base or overblow) to prevent playing normal and overblow frequencies simultaneously.
+        // Since drones are typically base notes, this naturally restricts the melody to base notes
+        // while the drone is active, and allows overblows when the drone rests. This avoids sudden jumps.
+        let melodyRange;
+        if (currentDroneKey) {
+            const droneIsOverblow = NOTES.find(n => n.key === currentDroneKey).isOverblow;
+            melodyRange = NOTES.filter(n => n.isOverblow === droneIsOverblow).map(n => n.key);
+        } else {
+            // Full range available when no drone is active
+            melodyRange = [';', 'l', 'k', 'j', 'h', 'g', 'f', 'd', 's', 'a'];
+        }
+        
         const length = Math.max(3, complexParams.phraseLength + Math.floor(Math.random() * 3) - 1);
         const phrase = [];
         
@@ -1410,7 +1437,13 @@ var worker_default = {
             if (complexParams.graceNoteChance > 0 && Math.random() < (complexParams.graceNoteChance / 100) && i < length - 1) {
                 // Grace note is usually a step above or below the main note
                 let graceIdx = nextIdx > 0 ? nextIdx - 1 : nextIdx + 1;
-                noteObj.graceKey = melodyRange[graceIdx];
+                const mainNote = NOTES.find(n => n.key === melodyRange[nextIdx]);
+                const graceNote = NOTES.find(n => n.key === melodyRange[graceIdx]);
+                
+                // FLUTE PHYSICS ENFORCEMENT: Grace note must not cross the overblow register boundary
+                if (mainNote && graceNote && mainNote.isOverblow === graceNote.isOverblow) {
+                    noteObj.graceKey = melodyRange[graceIdx];
+                }
             }
             
             phrase.push(noteObj);
