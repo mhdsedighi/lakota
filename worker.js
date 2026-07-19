@@ -117,7 +117,7 @@ var worker_default = {
         font-size: 1.2rem; 
         font-weight: bold; 
         color: #f4e4d4;
-        font-family: 'Vazirmatn', sans-serif; /* Changed to Vazirmatn */
+        font-family: 'Vazirmatn', sans-serif;
         box-shadow: 0 6px 0 #3e2312, 0 10px 8px rgba(0,0,0,0.4);
         transition: all 0.1s ease; 
         user-select: none; 
@@ -151,7 +151,7 @@ var worker_default = {
         color: #f4e4d4;
         border: 2px solid #3e2312;
         border-radius: 12px;
-        font-family: 'Vazirmatn', sans-serif; /* Changed to Vazirmatn */
+        font-family: 'Vazirmatn', sans-serif;
         cursor: pointer;
         touch-action: manipulation;
         -webkit-tap-highlight-color: transparent;
@@ -300,7 +300,7 @@ var worker_default = {
         max-width: 320px;
         padding: 14px 28px;
         font-size: 1.1rem;
-        font-family: 'Vazirmatn', sans-serif; /* Changed to Vazirmatn */
+        font-family: 'Vazirmatn', sans-serif;
         color: #f4e4d4;
         background: linear-gradient(180deg, #6b4423 0%, #4a2c17 100%);
         border: 2px solid #8b5a2b;
@@ -471,7 +471,7 @@ var worker_default = {
         border-radius: 6px;
         padding: 4px;
         text-align: center;
-        font-family: 'Vazirmatn', sans-serif; /* Changed to Vazirmatn */
+        font-family: 'Vazirmatn', sans-serif;
         font-size: 0.85rem;
     }
     .param-number:focus {
@@ -927,7 +927,7 @@ var worker_default = {
     // displayKey allows the audio tracking ID to differ from the visual key
     // isOverblowNote helps manage the Overblow button visual state
     // Advanced parameters allow profound musical realism (velocity, vibrato, breath, slide)
-    function playNote(freq, key, displayKey = key, velocity = 1.0, vibratoDepth = 2.5, breathNoiseLevel = 0.04, slideDuration = 0.1, isOverblowNote = false) {
+    function playNote(freq, key, displayKey = key, velocity = 1.0, vibratoDepth = 2.5, breathNoiseLevel = 0.04, slideDuration = 0.1, isOverblowNote = false, visualKey = key) {
         if (activeNotes[key]) return;
         initAudio();
         if (audioCtx.state === 'suspended') audioCtx.resume();
@@ -1005,10 +1005,10 @@ var worker_default = {
         whiteNoise.start(now);
         lfo.start(now);
 
-        activeNotes[key] = { osc, whiteNoise, lfo, oscGain, noiseGain, lfoGain, lowpass, bandpass, displayKey, isOverblowNote };
+        activeNotes[key] = { osc, whiteNoise, lfo, oscGain, noiseGain, lfoGain, lowpass, bandpass, displayKey, isOverblowNote, visualKey };
         
-        // Update visuals: Keyboard button lights up based on exact 'key' (a-;)
-        const keyEl = document.getElementById('key-' + key);
+        // Update visuals: Keyboard button lights up based on 'visualKey'
+        const keyEl = document.getElementById('key-' + visualKey);
         if (keyEl) keyEl.classList.add('active');
         
         // Flute holes light up based on 'displayKey' (the physical hole)
@@ -1031,9 +1031,13 @@ var worker_default = {
         }
     }
 
-    function stopNote(key, displayKey = key) {
+    function stopNote(key, displayKey, visualKey) {
         const note = activeNotes[key];
         if (!note) return;
+        
+        // Use provided arguments or fall back to the values stored in the note object
+        const actualDisplayKey = displayKey !== undefined ? displayKey : note.displayKey;
+        const actualVisualKey = visualKey !== undefined ? visualKey : note.visualKey;
         
         const now = audioCtx.currentTime;
         const releaseTime = 0.6;
@@ -1070,15 +1074,18 @@ var worker_default = {
 
         delete activeNotes[key];
 
-        // Remove visual from the specific keyboard key
-        const keyEl = document.getElementById('key-' + key);
-        if (keyEl) keyEl.classList.remove('active');
+        // Check if the keyboard key should be cleared (only if no other notes are using it)
+        const isVisualKeyStillActive = Object.values(activeNotes).some(n => n.visualKey === actualVisualKey);
+        if (!isVisualKeyStillActive) {
+            const keyEl = document.getElementById('key-' + actualVisualKey);
+            if (keyEl) keyEl.classList.remove('active');
+        }
 
         // Check if the physical hole should be cleared (only if no other notes are using it)
-        const isDisplayKeyStillActive = Object.values(activeNotes).some(n => n.displayKey === displayKey);
+        const isDisplayKeyStillActive = Object.values(activeNotes).some(n => n.displayKey === actualDisplayKey);
         if (!isDisplayKeyStillActive) {
-            const holeEl = document.getElementById('hole-' + displayKey);
-            const vHoleEl = document.getElementById('v-hole-' + displayKey);
+            const holeEl = document.getElementById('hole-' + actualDisplayKey);
+            const vHoleEl = document.getElementById('v-hole-' + actualDisplayKey);
             
             if (holeEl) {
                 holeEl.classList.remove('active');
@@ -1378,7 +1385,7 @@ var worker_default = {
         currentDroneKey = noteKey;
         // Drone uses steady velocity, moderate vibrato, low breath noise, and no slide
         // Updated to use globalParams for vibrato and breath noise
-        playNote(noteData.freq, 'drone-' + noteKey, noteData.baseKey, 0.6, globalParams.vibratoDepth * 0.8, globalParams.breathNoiseLevel * 0.5, 0, noteData.isOverblow);
+        playNote(noteData.freq, 'drone-' + noteKey, noteData.baseKey, 0.6, globalParams.vibratoDepth * 0.8, globalParams.breathNoiseLevel * 0.5, 0, noteData.isOverblow, noteData.key);
 
         const droneDuration = complexParams.droneDuration + (Math.random() * 1000 - 500);
         droneTimeout = setTimeout(() => {
@@ -1396,7 +1403,7 @@ var worker_default = {
         if (droneTimeout) { clearTimeout(droneTimeout); droneTimeout = null; }
         if (currentDroneKey) {
             const noteData = NOTES.find(n => n.key === currentDroneKey);
-            stopNote('drone-' + currentDroneKey, noteData ? noteData.baseKey : currentDroneKey);
+            stopNote('drone-' + currentDroneKey, noteData ? noteData.baseKey : currentDroneKey, noteData ? noteData.key : currentDroneKey);
             currentDroneKey = null;
         }
     }
@@ -1544,9 +1551,9 @@ var worker_default = {
                     const graceData = NOTES.find(n => n.key === note.graceKey);
                     const gId = 'grace-' + (noteCounter++);
                     // Grace notes are quick, light, with minimal vibrato/breath and a tiny slide
-                    playNote(graceData.freq, gId, graceData.baseKey, note.velocity * 0.8, globalParams.vibratoDepth * 0.3, globalParams.breathNoiseLevel * 0.5, 0.02, graceData.isOverblow);
+                    playNote(graceData.freq, gId, graceData.baseKey, note.velocity * 0.8, globalParams.vibratoDepth * 0.3, globalParams.breathNoiseLevel * 0.5, 0.02, graceData.isOverblow, graceData.key);
                     setTimeout(() => {
-                        if (activeNotes[gId]) stopNote(gId, graceData.baseKey);
+                        if (activeNotes[gId]) stopNote(gId, graceData.baseKey, graceData.key);
                     }, 120 / complexParams.tempo); // Very short duration based on tempo
                 }, delay);
                 delay += 120 / complexParams.tempo; // Add grace note duration to delay before main note
@@ -1565,10 +1572,11 @@ var worker_default = {
                     globalParams.vibratoDepth, 
                     globalParams.breathNoiseLevel, 
                     complexParams.slideDuration, 
-                    noteData.isOverblow
+                    noteData.isOverblow,
+                    noteData.key
                 );
                 setTimeout(() => {
-                    if (activeNotes[id]) stopNote(id, noteData.baseKey);
+                    if (activeNotes[id]) stopNote(id, noteData.baseKey, noteData.key);
                 }, note.duration * 0.9);
             }, delay);
             
@@ -1587,10 +1595,11 @@ var worker_default = {
                         globalParams.vibratoDepth * 0.5, 
                         globalParams.breathNoiseLevel * 0.8, 
                         0, 
-                        harmData.isOverblow
+                        harmData.isOverblow,
+                        harmData.key
                     );
                     setTimeout(() => {
-                        if (activeNotes[id]) stopNote(id, harmData.baseKey);
+                        if (activeNotes[id]) stopNote(id, harmData.baseKey, harmData.key);
                     }, note.duration * 0.85);
                 }, delay);
             }
